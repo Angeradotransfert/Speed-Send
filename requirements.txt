@@ -8,3 +8,4 @@ bcrypt
 gunicorn        # pour exécuter l’app en production
 requests        # (tu l’utilises pour Flutterwave & Telegram)
 python-dateutil # si tu t’en sers pour les dates
+rave-python
