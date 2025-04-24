@@ -1,2 +1,10 @@
-Flask~=3.1.0
-python-dotenv~=1.1.0
+Flask
+python-dotenv
+Flask-Mail
+Flask-WTF
+Flask-Login
+Flask-Limiter
+bcrypt
+gunicorn        # pour exécuter l’app en production
+requests        # (tu l’utilises pour Flutterwave & Telegram)
+python-dateutil # si tu t’en sers pour les dates
