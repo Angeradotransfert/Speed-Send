@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Vérification - SpeedSend</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #ecf0f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: #fff;
+            padding: 35px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #2c3e50;
+        }
+
+        input[type="text"], input[type="hidden"] {
+            padding: 12px;
+            margin: 15px 0;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 12px 18px;
+            background-color: #2e86de;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+
+        .success {
+            color: #27ae60;
+            margin-top: 10px;
+        }
+
+        .back {
+            margin-top: 20px;
+        }
+
+        .back a {
+            text-decoration: none;
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Vérifiez votre email 📩</h2>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        {% if message %}
+            <p class="success">{{ message }}</p>
+        {% endif %}
+
+        <form method="POST" action="/verify_code">
+            <input type="hidden" name="email" value="{{ email }}">
+            <input type="text" name="code" placeholder="Entrez votre code" required>
+            <button type="submit"><i class="fas fa-check-circle"></i> Vérifier</button>
+        </form>
+
+        <form method="POST" action="/resend_code">
+            <input type="hidden" name="email" value="{{ email }}">
+            <button type="submit" id="resendBtn" disabled>Renvoyer le code (<span id="countdown">30</span>s)</button>
+        </form>
+
+        <div class="back">
+            <a href="/login">← Retour à la connexion</a>
+        </div>
+    </div>
+
+    <script>
+        let countdown = 30;
+        const countdownElement = document.getElementById("countdown");
+        const resendBtn = document.getElementById("resendBtn");
+
+        const interval = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = countdown;
+
+            if (countdown <= 0) {
+                clearInterval(interval);
+                resendBtn.disabled = false;
+                resendBtn.innerText = "Renvoyer le code";
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

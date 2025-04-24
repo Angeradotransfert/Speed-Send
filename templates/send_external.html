@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Envoi Externe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: #fafafa;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .send-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .send-button:hover {
+            background-color: #45a049;
+        }
+
+        .external-button {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .external-button:hover {
+            background-color: #e53935;
+        }
+
+        .info {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>📤 Envoyer de l'argent</h1>
+
+    <form action="/send_external" method="POST">
+        <input type="hidden" name="sender_id" value="{{ user_id }}">
+
+        <label>Montant :</label>
+        <input type="number" name="amount" required>
+
+        <label>Devise :</label>
+        <input type="text" name="currency" value="XOF" required>
+
+        <label>Type de destinataire :</label>
+        <select name="recipient_type" required>
+            <option value="mobile_money">Mobile Money</option>
+            <option value="bank">Compte Bancaire</option>
+        </select>
+
+        <label>Nom du destinataire :</label>
+        <input type="text" name="recipient_name" required>
+
+        <label>Téléphone / Compte / IBAN :</label>
+        <input type="text" name="recipient_value" required>
+
+        <label>Opérateur ou banque :</label>
+        <select name="operator" required>
+            <option value="Orange Money">Orange Money</option>
+            <option value="MTN">MTN</option>
+            <option value="Wave">Wave</option>
+            <option value="UBA">UBA</option>
+            <option value="Ecobank">Ecobank</option>
+            <option value="Autre">Autre</option>
+        </select>
+
+        <button class="send-button" type="submit">Envoyer 💸</button>
+    </form>
+
+    <div class="info">
+        <h3>Votre ID utilisateur est : {{ user_id }}</h3>
+        <form action="/send_external" method="POST">
+            <button class="external-button" type="submit">Envoyer à un destinataire externe</button>
+        </form>
+    </div>
+
+</body>
+</html>

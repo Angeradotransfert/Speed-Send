@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Historique des Transferts</title>
+</head>
+<body>
+    <h1>📜 Historique des transferts</h1>
+    {% if transactions %}
+        <table border="1">
+            <tr>
+                <th>Montant</th>
+                <th>Devise</th>
+                <th>Destinataire</th>
+                <th>Date</th>
+            </tr>
+            {% for tx in transactions %}
+            <tr>
+                <td>{{ tx['amount'] }}</td>
+                <td>{{ tx['currency'] }}</td>
+                <td>{{ tx['recipient_name'] }}</td>
+                <td>{{ tx['date'] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>Aucun transfert effectué pour l'instant.</p>
+    {% endif %}
+</body>
+</html>

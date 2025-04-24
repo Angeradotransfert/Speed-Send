@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Envoyer de l'argent - SpeedSend</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #dfe6e9, #f1f2f6);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 480px;
+            margin: 70px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #2d3436;
+            margin-bottom: 30px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input, select {
+            padding: 14px;
+            margin-bottom: 18px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #00b894;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #019875;
+        }
+        .back-link {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .back-link a {
+            text-decoration: none;
+            color: #0984e3;
+            font-weight: bold;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>💸 Envoyer de l'argent</h2>
+    <h3>💼 Solde disponible</h3>
+    <ul>
+        {% for wallet in wallets %}
+            <li>{{ wallet['currency'] }} : {{ wallet['balance'] }}</li>
+        {% else %}
+            <li>Ce compte ne possède aucun solde pour le moment.</li>
+        {% endfor %}
+    </ul>
+
+    <form method="POST" action="/send_money">
+        <input type="hidden" name="sender" value="{{ username }}">
+        <input type="text" name="recipient" placeholder="Nom du destinataire" required>
+        <select name="currency" required>
+            <option value="" disabled selected>Choisissez la devise</option>
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="XOF">XOF (Franc CFA)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="NGN">NGN (Naira)</option>
+            <option value="RUB">RUB (Rouble)</option> <!-- Ajout du Rouble -->
+        </select>
+        <input type="number" name="amount" step="0.01" min="0" placeholder="Montant à envoyer" required>
+        <button type="submit"><i class="fas fa-paper-plane"></i> Envoyer</button>
+    </form>
+
+    <div class="back-link">
+        <a href="/dashboard/{{ user_id }}">← Retour au tableau de bord</a>
+    </div>
+</div>
+
+</body>
+</html>

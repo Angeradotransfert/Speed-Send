@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application de Transfert d'Argent</title>
+
+    <!-- Police Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Favicons SpeedSend -->
+    <link rel="icon" type="image/png" sizes="48x48"
+          href="{{ url_for('static', filename='img/speedsend_48.png') }}">
+    <link rel="icon" type="image/png" sizes="256x256"
+      href="{{ url_for('static', filename='img/speedsend_256.png.png') }}">
+
+    <style>
+        /* Police globale */
+        body { font-family: 'Poppins', sans-serif; }
+
+        /* Fond dégradé pour l'espace admin */
+        .admin-container {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            color:#fff;
+        }
+
+        .admin-title{font-size:36px;color:#fff;text-align:center;margin-bottom:30px;font-weight:600;}
+
+        .admin-table{width:100%;margin:0 auto;border-collapse:collapse;background:rgba(255,255,255,.9);border-radius:10px;overflow:hidden;}
+        .admin-table th,.admin-table td{padding:12px;text-align:center;border:1px solid #ddd;}
+        .admin-table th{background:#4facfe;color:#fff;}
+        .admin-table tr:nth-child(even){background:#f2f2f2;}
+        .admin-table tr:hover{background:#ddd;}
+        .admin-table td{color:#333;}
+
+        .admin-button{background:#4facfe;color:#fff;padding:10px 20px;margin-top:20px;border-radius:8px;cursor:pointer;text-align:center;text-decoration:none;font-size:16px;font-weight:500;}
+        .admin-button:hover{background:#0066cc;}
+    </style>
+</head>
+<body>
+
+    <!-- Logo SpeedSend -->
+    <div style="padding:10px 20px;">
+        <a href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='img/speedsend_256.png.png') }}"
+     alt="SpeedSend" style="height:50px;">
+        </a>
+    </div>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

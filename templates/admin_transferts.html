@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrateur - Gestion des Transferts</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            margin: 0;
+            padding: 0;
+            color: #fff;
+        }
+
+        .admin-container {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            color: #fff;
+            margin: 20px;
+        }
+
+        .admin-title {
+            font-size: 36px;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .admin-table {
+            width: 100%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .admin-table th, .admin-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .admin-table th {
+            background-color: #4facfe;
+            color: white;
+        }
+
+        .admin-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .admin-table tr:hover {
+            background-color: #ddd;
+        }
+
+        .admin-table td {
+            color: #333;
+        }
+
+        .admin-button {
+            background-color: #4facfe;
+            color: white;
+            padding: 10px 20px;
+            margin-top: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .admin-button:hover {
+            background-color: #0066cc;
+        }
+
+        .flash-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <h1 class="admin-title">Espace Administrateur - Gestion des Transferts</h1>
+
+    <!-- ✅ Affiche les messages flash après une action (ex: transfert marqué comme effectué) -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-message">
+          {% for message in messages %}
+            {{ message }}
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- ✅ Tableau des transferts -->
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Nom de l'expéditeur</th>
+                <th>Montant</th>
+                <th>Devise</th>
+                <th>Destinataire</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transfert in transferts %}
+            <tr>
+                <td>{{ transfert.sender_name }}</td>
+                <td>{{ transfert.amount }}</td>
+                <td>{{ transfert.currency }}</td>
+                <td>{{ transfert.recipient_name }}</td>
+
+                <!-- ✅ Statut du transfert -->
+                <td>
+                    {% if transfert.status == 'en_attente' %}
+                        <span style="color: red;">En attente</span>
+                    {% else %}
+                        <span style="color: green;">Effectué</span>
+                    {% endif %}
+                </td>
+
+                <!-- ✅ Action possible selon le statut -->
+                <td>
+                    {% if transfert.status == 'en_attente' %}
+                        <form method="POST" action="{{ url_for('marquer_effectue') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <input type="hidden" name="transfert_id" value="{{ transfert.id }}">
+                            <button type="submit" class="admin-button">Marquer comme effectué</button>
+                        </form>
+                    {% else %}
+                        <span>Transfert déjà effectué</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

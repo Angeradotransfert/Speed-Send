@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #c3dafe, #e0e7ff);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding: 40px 20px;
+    }
+
+    .form-card {
+        background: white;
+        max-width: 800px;
+        margin: auto;
+        padding: 30px 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    h2 {
+        color: #1e3a8a;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+        color: #333;
+    }
+
+    .form-control, .form-select {
+        margin-bottom: 15px;
+        border-radius: 8px;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+
+    .form-section-title {
+        font-size: 18px;
+        margin-top: 30px;
+        margin-bottom: 10px;
+        color: #1f2937;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-section-title i {
+        margin-right: 8px;
+    }
+
+    button {
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-weight: bold;
+        border-radius: 8px;
+        margin-top: 20px;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #1d4ed8;
+    }
+
+    @keyframes fadeIn {
+        from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+</style>
+
+<div class="form-card">
+    <h2>🚀 Envoyer de l'argent</h2>
+    <form method="POST" action="{{ url_for('transfert_formulaire') }}">
+    {{ form.hidden_tag() }}
+
+        <!-- Expéditeur -->
+        <label for="form-nom_expediteur">👤 Nom de l'expéditeur</label>
+        {{ form.nom_expediteur(class="form-control", id="form-nom_expediteur") }}
+
+        <label for="form-pays_envoi">🌍 Pays d'envoi</label>
+        {{ form.pays_envoi(class="form-select", id="form-pays_envoi") }}
+
+        <label for="numero_expediteur">📞 Numéro de l'expéditeur</label>
+        <input type="tel" class="form-control" id="numero_expediteur" name="numero_expediteur" required>
+
+        <label for="methode_envoi">🏦 Méthode d'envoi</label>
+        <select class="form-select" id="methode_envoi" name="methode_envoi" required></select>
+
+        <label for="montant">💰 Montant</label>
+        {{ form.montant(class="form-control", id="montant") }}
+
+        <label for="devise">💱 Devise</label>
+        <select class="form-select" id="devise" name="devise" required></select>
+
+        <!-- Champs cachés pour rate & montant converti -->
+        {{ form.exchange_rate(id="exchange_rate") }}
+        {{ form.converted_amount(id="converted_amount") }}
+
+        <!-- Montant reçu -->
+        <label for="montant_recu">💸 Montant que recevra le destinataire</label>
+        <div style="display:flex; gap:6px;">
+            <input type="text" class="form-control" id="montant_recu" readonly style="flex:1;">
+            <span id="devise_recu" style="align-self:center;font-weight:bold"></span>
+        </div>
+
+        <!-- Destinataire -->
+        <div class="form-section-title"><i>📨</i> Informations du destinataire</div>
+
+        <label for="pays_destinataire">🌍 Pays du destinataire</label>
+        <select class="form-select" id="pays_destinataire" name="pays_destinataire" required>
+            <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+            <option value="Russie">🇷🇺 Russie</option>
+        </select>
+
+        <label for="form-nom_destinataire">👤 Nom du destinataire</label>
+        {{ form.nom_destinataire(class="form-control", id="form-nom_destinataire") }}
+
+        <label for="numero_destinataire">📱 Numéro</label>
+        <input type="tel" class="form-control" id="numero_destinataire" name="numero_destinataire" required>
+
+        <label for="methode_reception">💳 Méthode de réception</label>
+        <select class="form-select" id="methode_reception" name="methode_reception" required></select>
+
+        <button type="submit">Envoyer</button>
+    </form>
+</div>
+
+<script>
+const methodesParPays = {
+  "Russie": ["Tinkoff", "Sberbank"],
+  "Côte d'Ivoire": ["Orange Money", "Wave", "MTN", "Moov"]
+};
+const devisesParPays = {
+  "Russie": ["RUB"],
+  "Côte d'Ivoire": ["XOF"]
+};
+const methodesReceptionParPays = methodesParPays;
+const indicatifs = {"Russie": "+7", "Côte d'Ivoire": "+225"};
+
+const fixedRates = {CI_RU:0.136, RU_CI:6.6};
+
+const paysEnvoiSelect = document.getElementById("form-pays_envoi");
+const methodeEnvoiSelect = document.getElementById("methode_envoi");
+const deviseSelect = document.getElementById("devise");
+const numeroExpediteur = document.getElementById("numero_expediteur");
+
+const paysDestSelect = document.getElementById("pays_destinataire");
+const methodeReceptionSelect = document.getElementById("methode_reception");
+const numeroDest = document.getElementById("numero_destinataire");
+
+function updateOptions(sel, opts){sel.innerHTML="";opts.forEach(o=>{const op=document.createElement("option");op.value=o;op.textContent=o;sel.appendChild(op);});}
+function setIndicatif(inp,p){const ind=indicatifs[p]||"";if(!inp.value.startsWith(ind)){inp.value=ind+" ";}}
+
+function getRate(pFrom,pTo){if(pFrom==="Côte d'Ivoire"&&pTo==="Russie") return fixedRates.CI_RU; if(pFrom==="Russie"&&pTo==="Côte d'Ivoire") return fixedRates.RU_CI; return 1;}
+function updateConversion(){const pf=paysEnvoiSelect.value;const pt=paysDestSelect.value;const amount=parseFloat(document.getElementById("montant").value)||0;const rate=getRate(pf,pt);document.getElementById("exchange_rate").value=rate;const conv=(amount*rate).toFixed(2);document.getElementById("converted_amount").value=conv;document.getElementById("montant_recu").value=conv;document.getElementById("devise_recu").textContent=pt==="Russie"?"RUB":"XOF";}
+
+paysEnvoiSelect.addEventListener("change",()=>{const p=paysEnvoiSelect.value;updateOptions(methodeEnvoiSelect,methodesParPays[p]||[]);updateOptions(deviseSelect,devisesParPays[p]||[]);setIndicatif(numeroExpediteur,p);updateConversion();});
+
+paysDestSelect.addEventListener("change",()=>{const p=paysDestSelect.value;updateOptions(methodeReceptionSelect,methodesReceptionParPays[p]||[]);setIndicatif(numeroDest,p);updateConversion();});
+
+document.getElementById("montant").addEventListener("input",updateConversion);
+
+window.addEventListener("DOMContentLoaded",()=>{paysEnvoiSelect.dispatchEvent(new Event("change"));paysDestSelect.dispatchEvent(new Event("change"));updateConversion();});
+</script>
+{% endblock %}
