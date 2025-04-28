@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 style="text-align:center; color:#1e3a8a; margin-top:20px;">Gestion des Taux et Frais</h2>
+
+<div style="max-width:1000px; margin:auto; margin-top:30px;">
+    <form method="POST" action="{{ url_for('add_fee') }}" style="margin-bottom:30px;">
+        <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px;">
+            <input type="text" name="source_country" placeholder="Pays d'envoi" class="form-control" required>
+            <input type="text" name="destination_country" placeholder="Pays de réception" class="form-control" required>
+            <input type="number" step="0.0001" name="rate" placeholder="Taux" class="form-control" required>
+            <input type="number" step="0.01" name="fee" placeholder="Frais" class="form-control" required>
+            <input type="text" name="fee_currency" placeholder="Devise du frais" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="margin-top:20px;">➕ Ajouter</button>
+    </form>
+
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Pays d'envoi</th>
+                <th>Pays de réception</th>
+                <th>Taux</th>
+                <th>Frais</th>
+                <th>Devise du frais</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fee in fees %}
+            <tr>
+                <td>{{ fee[0] }}</td>
+                <td>{{ fee[1] }}</td>
+                <td>{{ fee[2] }}</td>
+                <td>{{ fee[3] }}</td>
+                <td>{{ fee[4] }}</td>
+                <td>{{ fee[5] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

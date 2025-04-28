@@ -90,6 +90,67 @@
             margin-left: auto;
             margin-right: auto;
         }
+
+        .form-fee {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            color: #333;
+            margin-bottom: 40px;
+        }
+        .form-fee input {
+            margin: 5px 0;
+            padding: 8px;
+            width: 18%;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        .form-fee button {
+            background-color: #4facfe;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        .form-fee button:hover {
+            background-color: #0066cc;
+        }
+
+        /* 🎨 Nouveau style ultra CSS pour tableau des frais */
+        .fees-table {
+            background: linear-gradient(145deg, #ff9a9e, #fad0c4);
+            width: 100%;
+            margin: 30px auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            color: #333;
+        }
+        .fees-table th {
+            background-color: #f093fb;
+            color: white;
+            padding: 15px;
+        }
+        .fees-table td {
+            padding: 12px;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .fees-table tr:hover td {
+            background-color: #ffe0e0;
+        }
+        .delete-button {
+            background-color: #ff5252;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
     </style>
 </head>
 <body>
@@ -97,7 +158,57 @@
 <div class="admin-container">
     <h1 class="admin-title">Espace Administrateur - Gestion des Transferts</h1>
 
-    <!-- ✅ Affiche les messages flash après une action (ex: transfert marqué comme effectué) -->
+    <!-- ✅ Partie Ajout de taux -->
+    <h2 style="text-align:center; margin-top:30px; color:#fff;">🔵 Gestion des Taux et Frais</h2>
+
+    <div class="form-fee">
+        <form method="POST" action="{{ url_for('add_fee') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="text" name="source_country" placeholder="Pays d'envoi" required>
+    <input type="text" name="destination_country" placeholder="Pays de réception" required>
+    <input type="number" step="0.0001" name="rate" placeholder="Taux" required>
+    <input type="number" step="0.01" name="fee" placeholder="Frais" required>
+    <input type="text" name="fee_currency" placeholder="Devise frais" required>
+    <button type="submit">➕ Ajouter</button>
+</form>
+    </div>
+
+    <!-- ✅ Tableau frais/taux ultra stylé -->
+    <table class="fees-table">
+        <thead>
+    <tr>
+        <th>ID</th>
+        <th>Expéditeur</th>
+        <th>Destinataire</th>
+        <th>Taux</th>
+        <th>Frais</th>
+        <th>Devise</th>
+        <th>Action</th> <!-- ✅ Nouvelle colonne -->
+    </tr>
+</thead>
+        <tbody>
+    {% for fee in fees %}
+    <tr>
+        <td>{{ fee[0] }}</td>
+        <td>{{ fee[1] }}</td>
+        <td>{{ fee[2] }}</td>
+        <td>{{ fee[3] }}</td>
+        <td>{{ fee[4] }}</td>
+        <td>{{ fee[5] }}</td>
+        <td>
+            <form method="POST" action="{{ url_for('delete_fee', id=fee[0]) }}" onsubmit="return confirm('⚠️ Confirmer la suppression de ce taux/frais ?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="admin-button" style="background-color: #e11d48;">🗑 Supprimer</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+    </table>
+
+    <hr style="margin:50px 0; border:1px solid white;">
+
+    <!-- ✅ Flash message -->
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <div class="flash-message">
@@ -108,7 +219,7 @@
       {% endif %}
     {% endwith %}
 
-    <!-- ✅ Tableau des transferts -->
+    <!-- ✅ Ton ancien tableau des transferts intact -->
     <table class="admin-table">
         <thead>
             <tr>
@@ -127,8 +238,6 @@
                 <td>{{ transfert.amount }}</td>
                 <td>{{ transfert.currency }}</td>
                 <td>{{ transfert.recipient_name }}</td>
-
-                <!-- ✅ Statut du transfert -->
                 <td>
                     {% if transfert.status == 'en_attente' %}
                         <span style="color: red;">En attente</span>
@@ -136,8 +245,6 @@
                         <span style="color: green;">Effectué</span>
                     {% endif %}
                 </td>
-
-                <!-- ✅ Action possible selon le statut -->
                 <td>
                     {% if transfert.status == 'en_attente' %}
                         <form method="POST" action="{{ url_for('marquer_effectue') }}">
@@ -153,6 +260,7 @@
             {% endfor %}
         </tbody>
     </table>
+
 </div>
 
 </body>

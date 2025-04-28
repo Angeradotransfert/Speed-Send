@@ -11,7 +11,6 @@
             padding: 40px 20px;
             text-align: center;
         }
-
         .notification {
             padding: 15px;
             border-radius: 10px;
@@ -20,16 +19,8 @@
             margin: 0 auto 20px;
             color: #fff;
         }
-
-        .notification.success {
-            background-color: #22c55e;
-        }
-
-        .notification.pending {
-            background-color: #facc15;
-            color: #333;
-        }
-
+        .notification.success { background-color: #22c55e; }
+        .notification.pending { background-color: #facc15; color: #333; }
         .flash-message {
             background-color: #d1fae5;
             color: #065f46;
@@ -39,7 +30,6 @@
             font-weight: bold;
             max-width: 600px;
         }
-
         .card {
             background: #fff;
             color: #333;
@@ -49,17 +39,12 @@
             max-width: 600px;
             margin: auto;
         }
-
-        .details p {
-            margin: 6px 0;
-        }
-
+        .details p { margin: 6px 0; }
         .progress-bar {
             display: flex;
             margin: 30px 0 10px;
             justify-content: space-between;
         }
-
         .step {
             flex: 1;
             height: 4px;
@@ -67,11 +52,7 @@
             margin: 0 4px;
             position: relative;
         }
-
-        .step.active {
-            background: #22c55e;
-        }
-
+        .step.active { background: #22c55e; }
         .step::before {
             content: "";
             width: 12px;
@@ -83,18 +64,13 @@
             left: 50%;
             transform: translateX(-50%);
         }
-
-        .step.active::before {
-            background: #22c55e;
-        }
-
+        .step.active::before { background: #22c55e; }
         .labels {
             display: flex;
             justify-content: space-between;
             font-size: 14px;
             margin-bottom: 20px;
         }
-
         .btn-home {
             background: #2563eb;
             color: white;
@@ -106,14 +82,8 @@
             margin-top: 20px;
             transition: 0.3s;
         }
-
-        .btn-home:hover {
-            background: #1d4ed8;
-        }
-
-        img.qr {
-            margin-top: 10px;
-        }
+        .btn-home:hover { background: #1d4ed8; }
+        img.qr { margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -141,9 +111,11 @@
     <h2>📝 Détails du transfert</h2>
     <div class="details">
         <p><strong>Expéditeur :</strong> {{ transfert.sender_name }}</p>
+        <p><strong>Pays d'envoi :</strong> {{ transfert.sender_country }}</p> <!-- ✅ Ajout -->
         <p><strong>Montant :</strong> {{ transfert.amount }} {{ transfert.currency }}</p>
         <p><strong>Total payé :</strong> {{ transfert.total_with_fees }} {{ transfert.currency }}</p>
         <p><strong>Destinataire :</strong> {{ transfert.recipient_name }} - {{ transfert.recipient_phone }}</p>
+        <p><strong>Pays de réception :</strong> {{ transfert.recipient_country }}</p> <!-- ✅ Ajout -->
         <p><strong>Opérateur :</strong> {{ transfert.recipient_operator }}</p>
         <p><strong>Date :</strong> {{ transfert.created_at }}</p>
     </div>

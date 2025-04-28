@@ -32,6 +32,47 @@ FIXED_RATES = {
     ("Russie", "Côte d'Ivoire"): 6.6      # 1 RUB ➜ 6,6 XOF
 }
 
+# 🔒 Taux fixes
+FIXED_RATES = {
+    ("Côte d'Ivoire", "Russie"): 0.136,
+    ("Russie", "Côte d'Ivoire"): 6.6,
+    ("Sénégal", "Russie"): 0.136,
+    ("Russie", "Sénégal"): 6.6,
+    ("Guinée", "Russie"): 0.136,
+    ("Russie", "Guinée"): 6.6,
+    ("Burkina Faso", "Russie"): 0.136,
+    ("Russie", "Burkina Faso"): 6.6,
+    ("Cameroun", "Russie"): 0.128,
+    ("Russie", "Cameroun"): 6.54,
+    ("Congo Brazzaville", "Russie"): 0.128,
+    ("Russie", "Congo Brazzaville"): 6.54,
+    ("Congo Kinshasa", "Russie"): 0.128,
+    ("Russie", "Congo Kinshasa"): 6.54,
+    ("Tchad", "Russie"): 0.128,
+    ("Russie", "Tchad"): 6.54
+}
+
+# 🔒 Frais fixes
+FIXED_FEES = {
+    ("Côte d'Ivoire", "Russie"): 370,
+    ("Russie", "Côte d'Ivoire"): 30,
+    ("Sénégal", "Russie"): 370,
+    ("Russie", "Sénégal"): 30,
+    ("Guinée", "Russie"): 370,
+    ("Russie", "Guinée"): 30,
+    ("Burkina Faso", "Russie"): 370,
+    ("Russie", "Burkina Faso"): 30,
+    ("Cameroun", "Russie"): 280,
+    ("Russie", "Cameroun"): 25,
+    ("Congo Brazzaville", "Russie"): 280,
+    ("Russie", "Congo Brazzaville"): 25,
+    ("Congo Kinshasa", "Russie"): 280,
+    ("Russie", "Congo Kinshasa"): 25,
+    ("Tchad", "Russie"): 280,
+    ("Russie", "Tchad"): 25
+}
+
+
 # --- Ajout automatique des colonnes exchange_rate et converted_amount ----------
 def add_rate_columns():
     conn = sqlite3.connect('transfert.db')
@@ -86,7 +127,18 @@ NUMERO_COTEIVOIRE = os.getenv("NUMERO_COTEIVOIRE")
 
 class TransfertForm(FlaskForm):
     nom_expediteur = StringField("Nom de l'expéditeur", validators=[DataRequired()])
-    pays_envoi = SelectField("Pays d'envoi", choices=[("Russie", "Russie"), ("Côte d'Ivoire", "Côte d'Ivoire")], validators=[DataRequired()])
+    pays_envoi = SelectField("Pays d'envoi", choices=[
+        ("Russie", "Russie"),
+        ("Côte d'Ivoire", "Côte d'Ivoire"),
+        ("Congo Brazzaville", "Congo Brazzaville"),
+        ("Congo Kinshasa", "Congo Kinshasa"),
+        ("Guinée", "Guinée"),
+        ("Tchad", "Tchad"),
+        ("Cameroun", "Cameroun"),
+        ("Sénégal", "Sénégal"),
+        ("Burkina Faso", "Burkina Faso")
+    ], validators=[DataRequired()])
+
     methode_envoi = SelectField("Méthode d'envoi", choices=[
         ("Tinkoff", "Tinkoff"),
         ("Sberbank", "Sberbank"),
@@ -96,18 +148,37 @@ class TransfertForm(FlaskForm):
         ("Wave", "Wave"),
         ("Moov", "Moov")
     ], validators=[DataRequired()])
+
     montant = FloatField("Montant", validators=[DataRequired()])
-    devise = SelectField("Devise", choices=[
+
+    devise_expediteur = SelectField("Devise de l'expéditeur", choices=[
         ("XOF", "XOF"),
+        ("XAF", "XAF"),
         ("USD", "USD"),
         ("EUR", "EUR"),
         ("GBP", "GBP"),
         ("NGN", "NGN"),
         ("RUB", "RUB (Rouble)")
     ], validators=[DataRequired()])
+
     numero_expediteur = StringField("Numéro de l'expéditeur", validators=[DataRequired()])
+
+    # 🔵 Séparation propre
+    pays_destinataire = SelectField("Pays du destinataire", choices=[
+        ("Russie", "Russie"),
+        ("Côte d'Ivoire", "Côte d'Ivoire"),
+        ("Congo Brazzaville", "Congo Brazzaville"),
+        ("Congo Kinshasa", "Congo Kinshasa"),
+        ("Guinée", "Guinée"),
+        ("Tchad", "Tchad"),
+        ("Cameroun", "Cameroun"),
+        ("Sénégal", "Sénégal"),
+        ("Burkina Faso", "Burkina Faso")
+    ], validators=[DataRequired()])
+
     nom_destinataire = StringField("Nom du destinataire", validators=[DataRequired()])
     numero_destinataire = StringField("Numéro du destinataire", validators=[DataRequired()])
+
     methode_reception = SelectField("Méthode de réception", choices=[
         ("Orange Money", "Orange Money"),
         ("MTN", "MTN"),
@@ -117,9 +188,19 @@ class TransfertForm(FlaskForm):
         ("Compte bancaire", "Compte bancaire")
     ], validators=[DataRequired()])
 
-    # 👉 NOUVEAU
-    exchange_rate = HiddenField()  # taux appliqué (auto)
-    converted_amount = HiddenField()  # montant reçu (auto)
+    devise_destinataire = SelectField("Devise du destinataire", choices=[
+        ("XOF", "XOF"),
+        ("XAF", "XAF"),
+        ("USD", "USD"),
+        ("EUR", "EUR"),
+        ("GBP", "GBP"),
+        ("NGN", "NGN"),
+        ("RUB", "RUB (Rouble)")
+    ], validators=[DataRequired()])
+
+    exchange_rate = HiddenField()
+    converted_amount = HiddenField()
+
     submit = SubmitField("Envoyer")
 
 # Formulaire Flask-WTF pour la connexion
@@ -838,57 +919,124 @@ def send_external():
     else:
         return f"❌ Échec du transfert Flutterwave : {flutter_data.get('message', 'Erreur inconnue')}"
 
-
 @app.route('/transfert_formulaire', methods=['GET', 'POST'])
 def transfert_formulaire():
     form = TransfertForm()
 
-    # --- choices dynamiques ----------------------------------------------------
-    ci_methods = [("Orange Money", "Orange Money"),
-                  ("Wave", "Wave"), ("MTN", "MTN"), ("Moov", "Moov")]
-    ru_methods = [("Tinkoff", "Tinkoff"), ("Sberbank", "Sberbank")]
+    # 🔵 Choices globaux
+    pays_choices = [
+        ("Russie", "Russie"),
+        ("Côte d'Ivoire", "Côte d'Ivoire"),
+        ("Congo Brazzaville", "Congo Brazzaville"),
+        ("Congo Kinshasa", "Congo Kinshasa"),
+        ("Guinée", "Guinée"),
+        ("Tchad", "Tchad"),
+        ("Cameroun", "Cameroun"),
+        ("Sénégal", "Sénégal"),
+        ("Burkina Faso", "Burkina Faso")
+    ]
+    form.pays_envoi.choices = pays_choices
+    form.pays_destinataire.choices = pays_choices
 
+    ci_methods = [
+        ("Orange Money", "Orange Money"),
+        ("Wave", "Wave"),
+        ("MTN", "MTN"),
+        ("Moov", "Moov")
+    ]
+    ru_methods = [
+        ("Tinkoff", "Tinkoff"),
+        ("Sberbank", "Sberbank")
+    ]
+    autres_methods = [
+        ("Orange Money", "Orange Money"),
+        ("MTN", "MTN"),
+        ("Airtel Money", "Airtel Money"),
+        ("Wave", "Wave"),
+        ("Orange Money Guinée", "Orange Money Guinée"),
+        ("MTN Mobile Money", "MTN Mobile Money"),
+        ("Orange Money Cameroun", "Orange Money Cameroun"),
+        ("Wave Sénégal", "Wave Sénégal"),
+        ("Orange Money Sénégal", "Orange Money Sénégal"),
+        ("Orange Money Burkina", "Orange Money Burkina")
+    ]
+
+    devise_choices = [
+        ("XOF", "XOF"),
+        ("XAF", "XAF"),
+        ("USD", "USD"),
+        ("EUR", "EUR"),
+        ("GBP", "GBP"),
+        ("NGN", "NGN"),
+        ("RUB", "RUB (Rouble)")
+    ]
+    form.devise_expediteur.choices = devise_choices
+    form.devise_destinataire.choices = devise_choices
+
+    # ⚡ Dynamiser les méthodes en fonction du pays choisi
     if request.method == "POST":
-        dest_pays = request.form.get('pays_destinataire')
-        form.methode_reception.choices = ci_methods if dest_pays == "Côte d'Ivoire" else ru_methods
-    # --------------------------------------------------------------------------
+        pays_envoi = request.form.get('pays_envoi')
+        pays_destinataire = request.form.get('pays_destinataire')
 
+        if pays_envoi == "Russie":
+            form.methode_envoi.choices = ru_methods
+        elif pays_envoi == "Côte d'Ivoire":
+            form.methode_envoi.choices = ci_methods
+        else:
+            form.methode_envoi.choices = autres_methods
+
+        if pays_destinataire == "Russie":
+            form.methode_reception.choices = ru_methods
+        elif pays_destinataire == "Côte d'Ivoire":
+            form.methode_reception.choices = ci_methods
+        else:
+            form.methode_reception.choices = autres_methods
+
+    else:
+        # GET - Valeurs par défaut
+        form.methode_envoi.choices = autres_methods
+        form.methode_reception.choices = autres_methods
+
+    # 🎯 Validation
     if form.validate_on_submit():
         from datetime import datetime
+
         sender_name        = form.nom_expediteur.data
         sender_country     = form.pays_envoi.data
         payment_method     = form.methode_envoi.data
-        amount             = form.montant.data              # devise source
-        currency           = form.devise.data
+        amount             = form.montant.data
+        currency           = form.devise_expediteur.data
         recipient_name     = form.nom_destinataire.data
-        recipient_phone    = request.form.get('numero_destinataire')
+        recipient_phone    = form.numero_destinataire.data
         recipient_operator = form.methode_reception.data
-        recipient_country  = request.form.get('pays_destinataire')
+        recipient_country  = form.pays_destinataire.data
         numero_expediteur  = form.numero_expediteur.data
+        currency_dest      = form.devise_destinataire.data
 
-        # ⇢ taux et conversion
-        rate          = FIXED_RATES.get((sender_country, recipient_country), 1)
-        converted     = amount * rate                       # devise cible
-        currency_dest = "RUB" if recipient_country == "Russie" else "XOF"
+        # 🧮 Lire taux et frais depuis la base
+        conn = sqlite3.connect('transfert.db')
+        c = conn.cursor()
+        c.execute('''
+            SELECT rate, fee, fee_currency FROM fees_and_rates
+            WHERE source_country = ? AND destination_country = ?
+        ''', (sender_country, recipient_country))
+        result = c.fetchone()
+        conn.close()
 
-        # ⇢ frais par sens
-        if sender_country == "Russie" and recipient_country == "Côte d'Ivoire":
-            frais = 30
-            frais_currency = "RUB"
-        elif sender_country == "Côte d'Ivoire" and recipient_country == "Russie":
-            frais = 370
-            frais_currency = "XOF"
+        if result:
+            rate, frais, frais_currency = result
         else:
+            rate = 1
             frais = 0
             frais_currency = currency
 
-        # totaux
-        total_source = amount + frais        # ce que paie l’expéditeur (devise source)
-        total_dest   = converted + frais     # montant + frais dans la devise destinataire (facultatif)
-
+        converted = amount * rate
+        converted = amount * rate
+        total_source = amount + frais
+        total_dest   = converted + frais
         created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # --- Insert DB ----------------------------------------------------------
+        # 💾 Enregistrement en BDD
         conn = sqlite3.connect('transfert.db')
         c = conn.cursor()
         c.execute('''
@@ -896,19 +1044,18 @@ def transfert_formulaire():
                 sender_name, sender_country, payment_method, amount,
                 total_with_fees, currency, recipient_name, recipient_phone,
                 recipient_operator, created_at, recipient_country,
-                numero_expediteur, exchange_rate, converted_amount
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                numero_expediteur, exchange_rate, converted_amount, currency_dest
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             sender_name, sender_country, payment_method, amount,
             total_dest, currency, recipient_name, recipient_phone,
             recipient_operator, created_at, recipient_country,
-            numero_expediteur, rate, converted
+            numero_expediteur, rate, converted, currency_dest
         ))
         conn.commit()
         conn.close()
-        # -----------------------------------------------------------------------
 
-        # Telegram
+        # 🔔 Notification Telegram
         msg = (
             "📥 NOUVEAU TRANSFERT MANUEL\n"
             f"👤 De : {sender_name} ({sender_country}) via {payment_method}\n"
@@ -923,29 +1070,29 @@ def transfert_formulaire():
         )
         send_telegram_message(msg)
 
+        # 🔄 Redirection confirmation
         return redirect(url_for(
             'confirmer_transfert',
-            sender_name       = sender_name,
-            total_source      = total_source,     # total dans la devise source
-            currency          = currency,
-            payment_method    = payment_method,
-            recipient_name    = recipient_name,
-            recipient_phone   = recipient_phone,
-            recipient_operator= recipient_operator,
-            created_at        = created_at,
-            amount            = amount,
-            sender_country    = sender_country,
-            recipient_country = recipient_country,
-            numero_expediteur = numero_expediteur,
-            exchange_rate     = rate,
-            converted_amount  = converted,
-            currency_dest     = currency_dest,
-            frais             = frais,
-            frais_currency    = frais_currency
+            sender_name=sender_name,
+            total_source=total_source,
+            currency=currency,
+            payment_method=payment_method,
+            recipient_name=recipient_name,
+            recipient_phone=recipient_phone,
+            recipient_operator=recipient_operator,
+            created_at=created_at,
+            amount=amount,
+            sender_country=sender_country,
+            recipient_country=recipient_country,
+            numero_expediteur=numero_expediteur,
+            exchange_rate=rate,
+            converted_amount=converted,
+            currency_dest=currency_dest,
+            frais=frais,
+            frais_currency=frais_currency
         ))
 
-    # Affichage formulaire ou erreurs
-    if request.method == 'POST':
+    if request.method == "POST":
         print("❌ Erreurs de validation :", form.errors)
 
     return render_template(
@@ -1039,12 +1186,51 @@ def admin_transferts():
     conn = sqlite3.connect('transfert.db')
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
+
+    # 🔵 Récupérer tous les transferts
     c.execute("SELECT * FROM pending_transfers ORDER BY created_at DESC")
     transferts = c.fetchall()
-    conn.close()
-    csrf_token = generate_csrf()  # 🔐 Génère le token manuellement
-    return render_template('admin_transferts.html', transferts=transferts, csrf_token=csrf_token)
 
+    # 🔵 Récupérer aussi les taux/frais ajoutés
+    c.execute("SELECT * FROM fees_and_rates ORDER BY id DESC")
+    fees = c.fetchall()
+
+    conn.close()
+
+    csrf_token = generate_csrf()  # 🔐 Génère le token manuellement
+
+    return render_template('admin_transferts.html', transferts=transferts, fees=fees, csrf_token=csrf_token)
+
+@app.route('/add_fee', methods=['POST'])
+def add_fee():
+    source_country = request.form['source_country']
+    destination_country = request.form['destination_country']
+    rate = float(request.form['rate'])
+    fee = float(request.form['fee'])
+    fee_currency = request.form['fee_currency']
+
+    conn = sqlite3.connect('transfert.db')
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO fees_and_rates (source_country, destination_country, rate, fee, fee_currency)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (source_country, destination_country, rate, fee, fee_currency))
+    conn.commit()
+    conn.close()
+
+    flash('✅ Taux et frais ajoutés avec succès !')
+    return redirect(url_for('admin_transferts'))
+
+@app.route('/delete_fee/<int:id>', methods=['POST'])
+def delete_fee(id):
+    conn = sqlite3.connect('transfert.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM fees_and_rates WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+
+    flash('✅ Taux/frais supprimé avec succès !')
+    return redirect(url_for('admin_transferts'))
 
 @app.route('/marquer_effectue', methods=['POST'])
 def marquer_effectue():
@@ -1117,6 +1303,5 @@ import webbrowser
 
 if __name__ == '__main__':
     webbrowser.open("http://127.0.0.1:5000/")
-    if __name__ == '__main__':
-        app.run(debug=True)  # Utilise HTTP en mode développement
+    app.run(debug=True)  # Utilise HTTP en mode développement
 

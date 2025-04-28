@@ -2,6 +2,7 @@
 
 {% block content %}
 <style>
+    /* Ton style d'origine conservé */
     .confirmation-card {
         background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
         max-width: 600px;
@@ -12,81 +13,15 @@
         color: #333;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
-    .copy-btn {
-        background-color: #2563eb;
-        color: white;
-        border: none;
-        padding: 6px 12px;
-        font-size: 14px;
-        margin-left: 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .copy-btn:hover {
-        background-color: #1e40af;
-    }
-
-    .numero-anim {
-        background: #fff7ed;
-        color: #92400e;
-        border-left: 6px solid #f97316;
-        padding: 18px;
-        margin-top: 25px;
-        font-size: 18px;
-        font-weight: bold;
-        border-radius: 12px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        animation: fadeSlide 1s ease forwards;
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    @keyframes fadeSlide {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    h2 {
-        text-align: center;
-        color: #1e3a8a;
-        font-weight: bold;
-    }
-
-    .details {
-        font-size: 17px;
-        font-weight: bold;
-        line-height: 1.5;
-    }
-
-    .btn-action {
-        background-color: #4facfe;
-        color: white;
-        border: none;
-        padding: 14px 24px;
-        border-radius: 8px;
-        width: 100%;
-        font-size: 16px;
-        cursor: pointer;
-        margin-top: 25px;
-        font-weight: bold;
-    }
-
-    .btn-action:hover {
-        background-color: #1d72b8;
-    }
-
-    .countdown {
-        font-size: 18px;
-        font-weight: bold;
-        color: #d9534f;
-        text-align: center;
-        margin-top: 20px;
-    }
+    .copy-btn { background-color: #2563eb; color: white; border: none; padding: 6px 12px; font-size: 14px; margin-left: 12px; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; }
+    .copy-btn:hover { background-color: #1e40af; }
+    .numero-anim { background: #fff7ed; color: #92400e; border-left: 6px solid #f97316; padding: 18px; margin-top: 25px; font-size: 18px; font-weight: bold; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); animation: fadeSlide 1s ease forwards; opacity: 0; transform: translateY(20px); }
+    @keyframes fadeSlide { to { opacity: 1; transform: translateY(0); } }
+    h2 { text-align: center; color: #1e3a8a; font-weight: bold; }
+    .details { font-size: 17px; font-weight: bold; line-height: 1.5; }
+    .btn-action { background-color: #4facfe; color: white; border: none; padding: 14px 24px; border-radius: 8px; width: 100%; font-size: 16px; cursor: pointer; margin-top: 25px; font-weight: bold; }
+    .btn-action:hover { background-color: #1d72b8; }
+    .countdown { font-size: 18px; font-weight: bold; color: #d9534f; text-align: center; margin-top: 20px; }
 </style>
 
 <div class="confirmation-card">
@@ -94,40 +29,28 @@
     <p>Merci {{ sender_name }}. Votre demande a bien été enregistrée.</p>
 
     <div class="details">
-    <p>📞 Numéro de l'expéditeur : <strong>{{ numero_expediteur }}</strong></p>
-    <p>💸 Montant à envoyer : <strong>{{ amount }} {{ currency }}</strong></p>
-    <p>📈 Taux appliqué : <strong>{{ exchange_rate }}</strong></p>
+        <p>📞 Numéro de l'expéditeur : <strong>{{ numero_expediteur }}</strong></p>
+        <p>💸 Montant envoyé : <strong>{{ amount }} {{ currency }}</strong></p>
+        <p>💱 Montant que recevra le destinataire : <strong>{{ converted_amount }} {{ currency_dest }}</strong></p>
+        <p>📈 Taux appliqué : <strong>{{ exchange_rate }}</strong></p>
+        <p>🔁 Frais appliqués : <strong>{{ frais }} {{ frais_currency }}</strong></p>
+        <p>💰 Total à payer : <strong>{{ total_source }} {{ currency }}</strong></p>
+        <p>🏦 Paiement via : <strong>{{ payment_method }}</strong></p>
+        <p>📱 Destinataire : <strong>{{ recipient_name }} - {{ recipient_phone }} ({{ recipient_operator }})</strong></p>
+        <p>🌍 Pays du destinataire : <strong>{{ recipient_country }}</strong></p>
+        <p>🕒 Date : {{ created_at }}</p>
+    </div>
 
-    <!-- Montant converti -->
-    <p>💸 Montant que recevra le destinataire :
-        <strong>{{ converted_amount }} {{ currency_dest }}</strong></p>
-
-    <!-- Nouveaux frais par sens -->
-    <p>🔁 Frais appliqués : <strong>{{ frais }} {{ frais_currency }}</strong></p>
-
-    <!-- Total après ajout des frais -->
-    <p>💰 Total à payer : <strong>{{ total_source }} {{ currency }}</strong></p>
-
-    <p>🏦 Paiement via : <strong>{{ payment_method }}</strong></p>
-    <p>📱 Destinataire :
-        <strong>{{ recipient_name }} - {{ recipient_phone }} ({{ recipient_operator }})</strong></p>
-    <p>🌍 Pays du destinataire :
-        <strong>{{ recipient_country }}</strong></p>
-    <p>🕒 Date : {{ created_at }}</p>
-</div>
-
-    <!-- ✅ Numéro dynamique selon le pays -->
     <div id="animated-box" class="numero-anim" style="display: none;">
-    💳 Merci de transférer la somme totale (<strong>{{ total_source }} {{ currency }}</strong>) à ce numéro :
-    <br>
-    {% if sender_country == "Russie" %}
-        <span id="numero-text">{{ numero_russie }}</span>
-    {% elif sender_country == "Côte d'Ivoire" %}
-        <span id="numero-text">{{ numero_cote }}</span>
-    {% endif %}
-    <button onclick="copierNumero()" class="copy-btn">📋 Copier</button>
-    <span id="copied-msg" style="display:none; color:green; font-weight:bold;">✅ Numéro copié !</span>
-</div>
+        💳 Merci de transférer la somme totale (<strong>{{ total_source }} {{ currency }}</strong>) à ce numéro :<br>
+        {% if sender_country in ["Côte d'Ivoire", "Guinée", "Tchad", "Sénégal", "Burkina Faso", "Cameroun", "Congo Brazzaville", "Congo Kinshasa"] %}
+            <span id="numero-text">{{ numero_cote }}</span>
+        {% elif sender_country == "Russie" %}
+            <span id="numero-text">{{ numero_russie }}</span>
+        {% endif %}
+        <button onclick="copierNumero()" class="copy-btn">📋 Copier</button>
+        <span id="copied-msg" style="display:none; color:green; font-weight:bold;">✅ Numéro copié !</span>
+    </div>
 
     <div class="countdown">
         ⏳ Veuillez effectuer le paiement dans : <span id="timer">10:00</span>
@@ -143,7 +66,6 @@
 <script>
     let time = 10 * 60;
     const timerElement = document.getElementById('timer');
-
     const countdown = setInterval(() => {
         const minutes = Math.floor(time / 60);
         const seconds = time % 60;
@@ -155,9 +77,7 @@
             timerElement.textContent = "⛔ Temps écoulé";
         }
     }, 1000);
-</script>
 
-<script>
     window.addEventListener('load', function () {
         const box = document.getElementById('animated-box');
         if (box) {
