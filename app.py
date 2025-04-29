@@ -1,11 +1,12 @@
+import eventlet
+eventlet.monkey_patch()
 import os
 import random
 import sqlite3
 import string
 from unittest import result
 from flask_socketio import SocketIO, emit
-import eventlet
-eventlet.monkey_patch()
+
 
 
 
