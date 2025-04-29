@@ -1,144 +1,211 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Suivi de votre transfert - SpeedSend</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(to right, #4facfe, #00f2fe);
-            padding: 40px 20px;
-            text-align: center;
-        }
-        .notification {
-            padding: 15px;
-            border-radius: 10px;
-            font-weight: bold;
-            max-width: 600px;
-            margin: 0 auto 20px;
-            color: #fff;
-        }
-        .notification.success { background-color: #22c55e; }
-        .notification.pending { background-color: #facc15; color: #333; }
-        .flash-message {
-            background-color: #d1fae5;
-            color: #065f46;
-            padding: 12px 20px;
-            border-radius: 10px;
-            margin: 0 auto 20px;
-            font-weight: bold;
-            max-width: 600px;
-        }
-        .card {
-            background: #fff;
-            color: #333;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            max-width: 600px;
-            margin: auto;
-        }
-        .details p { margin: 6px 0; }
-        .progress-bar {
-            display: flex;
-            margin: 30px 0 10px;
-            justify-content: space-between;
-        }
-        .step {
-            flex: 1;
-            height: 4px;
-            background: #ccc;
-            margin: 0 4px;
-            position: relative;
-        }
-        .step.active { background: #22c55e; }
-        .step::before {
-            content: "";
-            width: 12px;
-            height: 12px;
-            background: #ccc;
-            border-radius: 50%;
-            position: absolute;
-            top: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        .step.active::before { background: #22c55e; }
-        .labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-        .btn-home {
-            background: #2563eb;
-            color: white;
-            padding: 12px 25px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: bold;
-            display: inline-block;
-            margin-top: 20px;
-            transition: 0.3s;
-        }
-        .btn-home:hover { background: #1d4ed8; }
-        img.qr { margin-top: 10px; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Suivi du Transfert - SpeedSend</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      background: linear-gradient(to bottom right, #fca311, #f9c46b, #ffe3b3);
+      background-size: 400% 400%;
+      animation: bgShift 15s ease infinite;
+      color: #333;
+    }
+
+    @keyframes bgShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .card {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      text-align: center;
+      color: #d97706;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .status-box {
+      padding: 15px;
+      border-radius: 10px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .status-box.success {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .status-box.pending {
+      background-color: #fff9c4;
+      color: #92400e;
+    }
+
+    .details p {
+      margin: 12px 0;
+      font-size: 16px;
+    }
+
+    .details p i {
+      margin-right: 8px;
+      color: #f59e0b;
+    }
+
+    .progress-bar {
+      display: flex;
+      justify-content: space-between;
+      margin: 30px 0 10px;
+      position: relative;
+    }
+
+    .step {
+      flex: 1;
+      height: 6px;
+      background: #e5e7eb;
+      margin: 0 4px;
+      border-radius: 3px;
+      position: relative;
+    }
+
+    .step.active {
+      background: #22c55e;
+    }
+
+    .step::before {
+      content: "";
+      width: 16px;
+      height: 16px;
+      background: #e5e7eb;
+      border-radius: 50%;
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 2px solid white;
+    }
+
+    .step.active::before {
+      background: #22c55e;
+    }
+
+    .labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 20px;
+      color: #444;
+    }
+
+    .qr {
+      display: block;
+      margin: 25px auto;
+    }
+
+    .btn-home {
+      display: inline-block;
+      background: #f59e0b;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .btn-home:hover {
+      background: #d97706;
+    }
+
+    hr {
+      margin-top: 30px;
+      margin-bottom: 10px;
+      border: none;
+      border-top: 1px solid #eee;
+    }
+
+    @media screen and (max-width: 700px) {
+      .card {
+        padding: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<!-- ✅ Message flash après paiement -->
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <div class="flash-message">
-      {% for message in messages %}
-        {{ message }}
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
-
-<!-- ✅ Notification selon le statut -->
-{% if transfert.status == 'effectué' %}
-    <div class="notification success">✅ Votre transfert a été validé avec succès.</div>
-{% else %}
-    <div class="notification pending">⏳ Votre transfert est encore en attente de validation.</div>
-{% endif %}
-
-<!-- 📦 Carte avec tous les détails du transfert -->
 <div class="card">
-    <h2>📝 Détails du transfert</h2>
-    <div class="details">
-        <p><strong>Expéditeur :</strong> {{ transfert.sender_name }}</p>
-        <p><strong>Pays d'envoi :</strong> {{ transfert.sender_country }}</p> <!-- ✅ Ajout -->
-        <p><strong>Montant :</strong> {{ transfert.amount }} {{ transfert.currency }}</p>
-        <p><strong>Total payé :</strong> {{ transfert.total_with_fees }} {{ transfert.currency }}</p>
-        <p><strong>Destinataire :</strong> {{ transfert.recipient_name }} - {{ transfert.recipient_phone }}</p>
-        <p><strong>Pays de réception :</strong> {{ transfert.recipient_country }}</p> <!-- ✅ Ajout -->
-        <p><strong>Opérateur :</strong> {{ transfert.recipient_operator }}</p>
-        <p><strong>Date :</strong> {{ transfert.created_at }}</p>
-    </div>
+  <h2>📦 Suivi de votre Transfert</h2>
 
-    <!-- ⏳ Barre de progression -->
-    <div class="progress-bar">
-        <div class="step active"></div>
-        <div class="step {% if transfert.status == 'effectué' %}active{% endif %}"></div>
-    </div>
-    <div class="labels">
-        <span>En attente</span>
-        <span>Effectué</span>
-    </div>
+  <!-- 🔁 Statut -->
+  <div id="notif-transfert">
+    {% if transfert.status == 'effectué' %}
+      <div class="status-box success">✅ Votre transfert a été validé avec succès.</div>
+    {% else %}
+      <div class="status-box pending">⏳ Votre transfert est encore en attente de validation.</div>
+    {% endif %}
+  </div>
 
-    <!-- 🔢 Référence + QR code -->
-    <hr>
-    <p><strong>Référence :</strong> TX-{{ "%05d"|format(transfert.id) }}</p>
-    <p>📲 Scannez ce QR code pour suivre à tout moment :</p>
-    <img class="qr" src="https://chart.googleapis.com/chart?cht=qr&chs=160x160&chl={{ url_for('etat_transfert', transfert_id=transfert.id, _external=True) }}" alt="QR Code">
+  <!-- 🔍 Détails -->
+  <div class="details">
+    <p><i>👤</i><strong>Expéditeur :</strong> {{ transfert.sender_name }}</p>
+    <p><i>🌍</i><strong>Pays d'envoi :</strong> {{ transfert.sender_country }}</p>
+    <p><i>💰</i><strong>Montant :</strong> {{ transfert.amount }} {{ transfert.currency }}</p>
+    <p><i>🧾</i><strong>Total payé :</strong> {{ transfert.total_with_fees }} {{ transfert.currency }}</p>
+    <p><i>👥</i><strong>Destinataire :</strong> {{ transfert.recipient_name }} - {{ transfert.recipient_phone }}</p>
+    <p><i>📦</i><strong>Pays de réception :</strong> {{ transfert.recipient_country }}</p>
+    <p><i>📱</i><strong>Opérateur :</strong> {{ transfert.recipient_operator }}</p>
+    <p><i>📅</i><strong>Date :</strong> {{ transfert.created_at }}</p>
+  </div>
 
-    <!-- 🏠 Retour à l'accueil -->
+  <!-- 📊 Progression -->
+  <div class="progress-bar">
+    <div class="step active"></div>
+    <div id="step-effectue" class="step {% if transfert.status == 'effectué' %}active{% endif %}"></div>
+  </div>
+  <div class="labels">
+    <span>🕒 En attente</span>
+    <span>✅ Effectué</span>
+  </div>
+
+  <!-- 🆔 Référence -->
+  <hr>
+  <p><strong>Référence :</strong> TX-{{ "%05d"|format(transfert.id) }}</p>
+  <p>📲 Scannez ce QR code pour accéder à ce suivi :</p>
+  <img class="qr" src="https://chart.googleapis.com/chart?cht=qr&chs=160x160&chl={{ url_for('etat_transfert', transfert_id=transfert.id, _external=True) }}" alt="QR Code">
+
+  <div style="text-align:center; margin-top: 20px;">
     <a href="{{ url_for('home') }}" class="btn-home">🏠 Retour à l'accueil</a>
+  </div>
 </div>
+
+<!-- 🔌 Socket.IO -->
+<script>
+const socket = io();
+
+socket.on('transfert_valide', function(data) {
+  const transfertId = {{ transfert.id }};
+  if (data.transfert_id === transfertId) {
+    document.getElementById("notif-transfert").innerHTML = `
+      <div class="status-box success">✅ Votre transfert a été validé avec succès.</div>
+    `;
+    document.getElementById("step-effectue").classList.add("active");
+  }
+});
+</script>
 
 </body>
 </html>

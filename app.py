@@ -2,6 +2,9 @@ import os
 import random
 import sqlite3
 import string
+from unittest import result
+from flask_socketio import SocketIO, emit
+
 
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session
@@ -104,6 +107,8 @@ def add_num_expediteur_column():
 add_num_expediteur_column()
 
 app = Flask(__name__)
+
+socketio = SocketIO(app)
 
 csrf = CSRFProtect(app)
 limiter = Limiter(get_remote_address)
@@ -920,7 +925,7 @@ def send_external():
         return f"❌ Échec du transfert Flutterwave : {flutter_data.get('message', 'Erreur inconnue')}"
 
 @app.route('/transfert_formulaire', methods=['GET', 'POST'])
-def transfert_formulaire():
+def transfert_formulaire(transfert_id=None):
     form = TransfertForm()
 
     # 🔵 Choices globaux
@@ -1017,18 +1022,21 @@ def transfert_formulaire():
         conn = sqlite3.connect('transfert.db')
         c = conn.cursor()
         c.execute('''
-            SELECT rate, fee, fee_currency FROM fees_and_rates
+            SELECT rate FROM fees_and_rates
             WHERE source_country = ? AND destination_country = ?
         ''', (sender_country, recipient_country))
-        result = c.fetchone()
-        conn.close()
+        rate_row = c.fetchone()
+        rate = rate_row[0] if rate_row else 1
 
-        if result:
-            rate, frais, frais_currency = result
+        # 2.5 % des frais
+        frais = round(amount * 0.025, 2)
+
+        # Devise des frais selon le pays d’envoi
+        if sender_country in ["Russie"]:
+            frais_currency = "RUB"
         else:
-            rate = 1
-            frais = 0
-            frais_currency = currency
+            frais_currency = "XOF"
+        conn.close()
 
         converted = amount * rate
         converted = amount * rate
@@ -1055,6 +1063,16 @@ def transfert_formulaire():
         conn.commit()
         conn.close()
 
+        # ✅ Envoie le transfert au tableau admin en temps réel
+        socketio.emit('nouveau_transfert', {
+            'id': transfert_id,
+            'sender_name': sender_name,
+            'amount': amount,
+            'currency': currency,
+            'recipient_name': recipient_name,
+            'created_at': created_at,
+            'status': 'en_attente'
+        })
         # 🔔 Notification Telegram
         msg = (
             "📥 NOUVEAU TRANSFERT MANUEL\n"
@@ -1191,59 +1209,30 @@ def admin_transferts():
     c.execute("SELECT * FROM pending_transfers ORDER BY created_at DESC")
     transferts = c.fetchall()
 
-    # 🔵 Récupérer aussi les taux/frais ajoutés
-    c.execute("SELECT * FROM fees_and_rates ORDER BY id DESC")
-    fees = c.fetchall()
-
     conn.close()
 
     csrf_token = generate_csrf()  # 🔐 Génère le token manuellement
+    return render_template('admin_transferts.html', transferts=transferts, csrf_token=csrf_token)
 
-    return render_template('admin_transferts.html', transferts=transferts, fees=fees, csrf_token=csrf_token)
+from flask import jsonify
 
-@app.route('/add_fee', methods=['POST'])
-def add_fee():
-    source_country = request.form['source_country']
-    destination_country = request.form['destination_country']
-    rate = float(request.form['rate'])
-    fee = float(request.form['fee'])
-    fee_currency = request.form['fee_currency']
-
-    conn = sqlite3.connect('transfert.db')
-    c = conn.cursor()
-    c.execute('''
-        INSERT INTO fees_and_rates (source_country, destination_country, rate, fee, fee_currency)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (source_country, destination_country, rate, fee, fee_currency))
-    conn.commit()
-    conn.close()
-
-    flash('✅ Taux et frais ajoutés avec succès !')
-    return redirect(url_for('admin_transferts'))
-
-@app.route('/delete_fee/<int:id>', methods=['POST'])
-def delete_fee(id):
-    conn = sqlite3.connect('transfert.db')
-    c = conn.cursor()
-    c.execute('DELETE FROM fees_and_rates WHERE id = ?', (id,))
-    conn.commit()
-    conn.close()
-
-    flash('✅ Taux/frais supprimé avec succès !')
-    return redirect(url_for('admin_transferts'))
+from flask import jsonify
 
 @app.route('/marquer_effectue', methods=['POST'])
 def marquer_effectue():
-    transfert_id = request.form['transfert_id']
+    transfert_id = request.form.get('transfert_id')
+    if not transfert_id:
+        return jsonify({'success': False}), 400
+
     conn = sqlite3.connect('transfert.db')
     c = conn.cursor()
     c.execute("UPDATE pending_transfers SET status = 'effectué' WHERE id = ?", (transfert_id,))
     conn.commit()
     conn.close()
-    flash("🎉 Votre transfert a été validé avec succès.")
-    return redirect(url_for('transfert_valide'))
-    # Affiche la page de confirmation à la place du retour admin
-    return redirect(url_for('transfert_valide'))
+
+    # ✅ Notification socket
+    socketio.emit('transfert_valide', {'transfert_id': int(transfert_id)})
+    return jsonify({'success': True})
 
 @app.route('/init_db')
 def run_init_db():
@@ -1300,8 +1289,14 @@ def debug_list_img():
 
 
 import webbrowser
+import threading
+
+def open_browser():
+    webbrowser.open_new("http://127.0.0.1:5000")
+
+# Lancer dans un thread séparé pour ne pas bloquer l'app
+threading.Timer(1.5, open_browser).start()
 
 if __name__ == '__main__':
-    webbrowser.open("http://127.0.0.1:5000/")
-    app.run(debug=True)  # Utilise HTTP en mode développement
+    socketio.run(app, debug=True)# Utilise HTTP en mode développement
 

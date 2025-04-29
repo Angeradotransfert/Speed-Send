@@ -94,4 +94,69 @@
         });
     }
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+  const socket = io();
+  socket.on('transfert_valide', function(data) {
+    const idPage = {{ transfert_id }};
+    if (data.transfert_id === idPage) {
+      // ✅ Remplace le message d'attente par une confirmation
+      const confirmationBox = document.querySelector(".confirmation-card");
+      const messageElement = document.createElement("div");
+      messageElement.innerHTML = "✅ Votre transfert a été validé avec succès !";
+      messageElement.style.background = "#22c55e";
+      messageElement.style.color = "white";
+      messageElement.style.padding = "15px";
+      messageElement.style.fontWeight = "bold";
+      messageElement.style.borderRadius = "10px";
+      messageElement.style.marginBottom = "20px";
+      confirmationBox.insertBefore(messageElement, confirmationBox.firstChild);
+    }
+  });
+</script>
 {% endblock %}
+<style>
+@keyframes flash-success {
+  0%, 100% { background-color: #22c55e; }
+  50% { background-color: #16a34a; }
+}
+.animated-success {
+  animation: flash-success 1s ease-in-out 2;
+}
+.icon-check {
+  display: inline-block;
+  margin-right: 10px;
+  animation: pop 0.6s ease;
+}
+@keyframes pop {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); }
+}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+  const socket = io();
+
+  socket.on('transfert_valide', function(data) {
+    const idPage = {{ transfert_id }};
+    if (data.transfert_id === idPage) {
+      const box = document.querySelector(".confirmation-card");
+      const msg = document.createElement("div");
+      msg.className = "animated-success";
+      msg.style.background = "#22c55e";
+      msg.style.color = "white";
+      msg.style.padding = "15px";
+      msg.style.fontWeight = "bold";
+      msg.style.borderRadius = "10px";
+      msg.style.marginBottom = "20px";
+
+      msg.innerHTML = `<span class="icon-check">✅</span>Votre transfert a été validé avec succès !`;
+
+      box.insertBefore(msg, box.firstChild);
+    }
+  });
+</script>
+

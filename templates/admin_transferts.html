@@ -1,267 +1,234 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrateur - Gestion des Transferts</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(to right, #4facfe, #00f2fe);
-            margin: 0;
-            padding: 0;
-            color: #fff;
-        }
-
-        .admin-container {
-            background: linear-gradient(to right, #4facfe, #00f2fe);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            color: #fff;
-            margin: 20px;
-        }
-
-        .admin-title {
-            font-size: 36px;
-            color: #fff;
-            text-align: center;
-            margin-bottom: 30px;
-            font-weight: bold;
-        }
-
-        .admin-table {
-            width: 100%;
-            margin: 0 auto;
-            border-collapse: collapse;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .admin-table th, .admin-table td {
-            padding: 12px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        .admin-table th {
-            background-color: #4facfe;
-            color: white;
-        }
-
-        .admin-table tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        .admin-table tr:hover {
-            background-color: #ddd;
-        }
-
-        .admin-table td {
-            color: #333;
-        }
-
-        .admin-button {
-            background-color: #4facfe;
-            color: white;
-            padding: 10px 20px;
-            margin-top: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            font-size: 16px;
-        }
-
-        .admin-button:hover {
-            background-color: #0066cc;
-        }
-
-        .flash-message {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 10px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: bold;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .form-fee {
-            background-color: white;
-            padding: 20px;
-            border-radius: 15px;
-            color: #333;
-            margin-bottom: 40px;
-        }
-        .form-fee input {
-            margin: 5px 0;
-            padding: 8px;
-            width: 18%;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        .form-fee button {
-            background-color: #4facfe;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-        .form-fee button:hover {
-            background-color: #0066cc;
-        }
-
-        /* 🎨 Nouveau style ultra CSS pour tableau des frais */
-        .fees-table {
-            background: linear-gradient(145deg, #ff9a9e, #fad0c4);
-            width: 100%;
-            margin: 30px auto;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            color: #333;
-        }
-        .fees-table th {
-            background-color: #f093fb;
-            color: white;
-            padding: 15px;
-        }
-        .fees-table td {
-            padding: 12px;
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-        .fees-table tr:hover td {
-            background-color: #ffe0e0;
-        }
-        .delete-button {
-            background-color: #ff5252;
-            border: none;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .delete-button:hover {
-            background-color: #d32f2f;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrateur - Gestion des Transferts</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      margin: 0;
+      padding: 0;
+      color: #fff;
+    }
+    .admin-container {
+      padding: 20px;
+      margin: 20px;
+    }
+    .admin-title {
+      font-size: 36px;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .search-bar {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .search-bar input, .search-bar select {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: rgba(255,255,255,0.9);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .admin-table th, .admin-table td {
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    .admin-table th {
+      background-color: #4facfe;
+      color: white;
+    }
+    .admin-table tr:hover { background-color: #ddd; }
+    .admin-table td { color: #333; }
+    .admin-button {
+      background-color: #4facfe;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      border: none;
+    }
+    .admin-button:hover { background-color: #0066cc; }
+    .flash-message {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: bold;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .tr-blue { background-color: #cce5ff !important; }
+    .tr-orange { background-color: #ffe5b4 !important; }
+    .tr-red { background-color: #f8d7da !important; }
+    .tr-flash {
+      animation: flash 1s ease-in-out 3;
+    }
+    @keyframes flash {
+      0%, 100% { background-color: #d4edda; }
+      50% { background-color: #a3e635; }
+    }
+  </style>
 </head>
 <body>
 
 <div class="admin-container">
-    <h1 class="admin-title">Espace Administrateur - Gestion des Transferts</h1>
+  <h1 class="admin-title">Espace Administrateur - Gestion des Transferts</h1>
 
-    <!-- ✅ Partie Ajout de taux -->
-    <h2 style="text-align:center; margin-top:30px; color:#fff;">🔵 Gestion des Taux et Frais</h2>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="flash-message">
+        {% for message in messages %}
+          {{ message }}
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
 
-    <div class="form-fee">
-        <form method="POST" action="{{ url_for('add_fee') }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <input type="text" name="source_country" placeholder="Pays d'envoi" required>
-    <input type="text" name="destination_country" placeholder="Pays de réception" required>
-    <input type="number" step="0.0001" name="rate" placeholder="Taux" required>
-    <input type="number" step="0.01" name="fee" placeholder="Frais" required>
-    <input type="text" name="fee_currency" placeholder="Devise frais" required>
-    <button type="submit">➕ Ajouter</button>
-</form>
-    </div>
+  <div class="search-bar">
+    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="🔍 Rechercher...">
+    <select id="statusFilter" onchange="filterTable()">
+      <option value="tous">Tous</option>
+      <option value="en attente">En attente</option>
+      <option value="paiement confirmé">Paiement confirmé</option>
+      <option value="effectué">Effectué</option>
+    </select>
+  </div>
 
-    <!-- ✅ Tableau frais/taux ultra stylé -->
-    <table class="fees-table">
-        <thead>
-    <tr>
-        <th>ID</th>
+  <table class="admin-table" id="transfertTable">
+    <thead>
+      <tr>
         <th>Expéditeur</th>
-        <th>Destinataire</th>
-        <th>Taux</th>
-        <th>Frais</th>
+        <th>Montant</th>
         <th>Devise</th>
-        <th>Action</th> <!-- ✅ Nouvelle colonne -->
-    </tr>
-</thead>
-        <tbody>
-    {% for fee in fees %}
-    <tr>
-        <td>{{ fee[0] }}</td>
-        <td>{{ fee[1] }}</td>
-        <td>{{ fee[2] }}</td>
-        <td>{{ fee[3] }}</td>
-        <td>{{ fee[4] }}</td>
-        <td>{{ fee[5] }}</td>
+        <th>Destinataire</th>
+        <th>Date/Heure</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for transfert in transferts %}
+      {% set montant = transfert.amount | float %}
+      <tr class="{% if montant <= 30000 %}tr-blue{% elif montant <= 80000 %}tr-orange{% else %}tr-red{% endif %}">
+        <td>{{ transfert.sender_name }}</td>
+        <td>{{ transfert.amount }}</td>
+        <td>{{ transfert.currency }}</td>
+        <td>{{ transfert.recipient_name }}</td>
+        <td>{{ transfert.created_at }}</td>
         <td>
-            <form method="POST" action="{{ url_for('delete_fee', id=fee[0]) }}" onsubmit="return confirm('⚠️ Confirmer la suppression de ce taux/frais ?');">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <button type="submit" class="admin-button" style="background-color: #e11d48;">🗑 Supprimer</button>
-            </form>
+          {% if transfert.status == 'en_attente' %}
+            <span style="color: red;">En attente</span>
+          {% elif transfert.status == 'paiement_confirme' %}
+            <span style="color: orange;">Paiement confirmé</span>
+          {% else %}
+            <span style="color: green;">Effectué</span>
+          {% endif %}
         </td>
-    </tr>
-    {% endfor %}
-</tbody>
-    </table>
-
-    <hr style="margin:50px 0; border:1px solid white;">
-
-    <!-- ✅ Flash message -->
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="flash-message">
-          {% for message in messages %}
-            {{ message }}
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
-
-    <!-- ✅ Ton ancien tableau des transferts intact -->
-    <table class="admin-table">
-        <thead>
-            <tr>
-                <th>Nom de l'expéditeur</th>
-                <th>Montant</th>
-                <th>Devise</th>
-                <th>Destinataire</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for transfert in transferts %}
-            <tr>
-                <td>{{ transfert.sender_name }}</td>
-                <td>{{ transfert.amount }}</td>
-                <td>{{ transfert.currency }}</td>
-                <td>{{ transfert.recipient_name }}</td>
-                <td>
-                    {% if transfert.status == 'en_attente' %}
-                        <span style="color: red;">En attente</span>
-                    {% else %}
-                        <span style="color: green;">Effectué</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if transfert.status == 'en_attente' %}
-                        <form method="POST" action="{{ url_for('marquer_effectue') }}">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                            <input type="hidden" name="transfert_id" value="{{ transfert.id }}">
-                            <button type="submit" class="admin-button">Marquer comme effectué</button>
-                        </form>
-                    {% else %}
-                        <span>Transfert déjà effectué</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
+        <td>
+          {% if transfert.status in ['en_attente', 'paiement_confirme'] %}
+            <button class="admin-button mark-button" data-id="{{ transfert.id }}">Marquer comme effectué</button>
+          {% else %}
+            <span>Transfert déjà effectué</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
+
+<!-- JS -->
+<script>
+const socket = io();
+
+socket.on('nouveau_transfert', (data) => {
+  const tbody = document.querySelector('#transfertTable tbody');
+
+  const montant = parseFloat(data.amount);
+  let classe = 'tr-blue';
+  if (montant > 80000) classe = 'tr-red';
+  else if (montant > 30000) classe = 'tr-orange';
+
+  const row = document.createElement('tr');
+  row.className = `${classe} tr-flash`;
+
+  row.innerHTML = `
+    <td>${data.sender_name}</td>
+    <td>${data.amount}</td>
+    <td>${data.currency}</td>
+    <td>${data.recipient_name}</td>
+    <td>${data.created_at}</td>
+    <td><span style="color: red;">En attente</span></td>
+    <td>
+      <button class="admin-button mark-button" data-id="${data.id}">Marquer comme effectué</button>
+    </td>
+  `;
+
+  tbody.prepend(row);
+  activerBoutonsMarquer();
+});
+
+function activerBoutonsMarquer() {
+  document.querySelectorAll(".mark-button").forEach(button => {
+    button.onclick = function () {
+      const transfertId = this.dataset.id;
+      const csrfToken = "{{ csrf_token }}";
+      const row = this.closest("tr");
+      const statusCell = row.querySelector("td:nth-child(6)");
+      const actionCell = row.querySelector("td:nth-child(7)");
+
+      fetch("{{ url_for('marquer_effectue') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `csrf_token=${csrfToken}&transfert_id=${transfertId}`
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          statusCell.innerHTML = '<span style="color: green;">Effectué ✅</span>';
+          actionCell.innerHTML = '<span>Transfert déjà effectué</span>';
+        } else {
+          alert("Erreur lors de la validation.");
+        }
+      })
+      .catch(() => alert("Erreur réseau."));
+    };
+  });
+}
+
+activerBoutonsMarquer();
+
+function filterTable() {
+  const input = document.getElementById("searchInput").value.toLowerCase();
+  const statusFilter = document.getElementById("statusFilter").value.toLowerCase();
+  const rows = document.querySelectorAll("#transfertTable tbody tr");
+
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const status = row.cells[5]?.textContent.toLowerCase();
+    const matchSearch = text.includes(input);
+    const matchStatus = statusFilter === "tous" || status.includes(statusFilter);
+    row.style.display = matchSearch && matchStatus ? "" : "none";
+  });
+}
+</script>
 
 </body>
 </html>
