@@ -39,7 +39,7 @@
         <div class="flag-preview" id="flag-envoi"></div>
 
         <label for="numero_expediteur">📞 Numéro de l'expéditeur</label>
-        {{ form.numero_expediteur(class="form-control", id="numero_expediteur") }}
+        {{ form.numero_expediteur(class="form-control", id="numero_expediteur", required=True) }}
 
         <label for="methode_envoi">🏦 Méthode d'envoi</label>
         {{ form.methode_envoi(class="form-select", id="methode_envoi") }}
@@ -168,6 +168,26 @@
     document.getElementById('pays_destinataire').addEventListener('change', function() {
         updateForm('pays_destinataire', 'numero_destinataire', 'methode_reception', 'devise_destinataire');
     });
+
+    const formatNumeros = {
+  "Côte d'Ivoire": 10,
+  "Russie": 10,
+  "Guinée": 9,
+  "Cameroun": 9,
+  "Sénégal": 9,
+  "Burkina Faso": 8,
+  "Congo Brazzaville": 9,
+  "Congo Kinshasa": 9
+};
+
+document.getElementById("numero_expediteur").addEventListener("input", function () {
+  const pays = document.getElementById("pays_envoi").value;
+  const longueurMax = formatNumeros[pays];
+  const sansIndicatif = this.value.replace(/[^0-9]/g, "").replace(/^\+?\d{1,4}/, ""); // enlève indicatif
+  if (sansIndicatif.length > longueurMax) {
+    this.value = this.value.slice(0, this.value.length - 1); // empêche de dépasser
+  }
+});
 </script>
 {% endblock %}
 // Forcer l'affichage du drapeau au chargement si une valeur est déjà sélectionnée
