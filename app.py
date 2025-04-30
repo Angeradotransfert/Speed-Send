@@ -1231,11 +1231,26 @@ from flask import jsonify
 def marquer_effectue():
     try:
         transfert_id = request.form.get('transfert_id')
-        # ... (ton code habituel ici)
+        if not transfert_id:
+            return jsonify({"success": False, "error": "ID manquant"})
+
+        conn = sqlite3.connect('transfert.db')
+        c = conn.cursor()
+        c.execute("UPDATE pending_transfers SET status = 'effectué' WHERE id = ?", (transfert_id,))
+        conn.commit()
+        conn.close()
+
+        # 🔁 Notifier les clients en temps réel
+        socketio.emit('transfert_valide', {
+            'transfert_id': int(transfert_id),
+            'statut': 'effectué'
+        })
+
         return jsonify({"success": True})
     except Exception as e:
         print(f"💥 ERREUR dans /marquer_effectue : {e}")
         return jsonify({"success": False, "error": str(e)}), 500
+
 
 @app.route('/init_db')
 def run_init_db():
