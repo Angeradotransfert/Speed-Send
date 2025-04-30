@@ -1226,6 +1226,11 @@ from flask import jsonify
 
 from flask import jsonify
 
+from flask_wtf.csrf import CSRFProtect
+
+csrf = CSRFProtect(app)
+
+@csrf.exempt
 @app.route('/marquer_effectue', methods=['POST'])
 def marquer_effectue():
     transfert_id = request.form.get('transfert_id')
