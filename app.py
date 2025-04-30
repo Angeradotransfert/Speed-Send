@@ -55,7 +55,6 @@ FIXED_RATES = {
     ("Russie", "Congo Brazzaville"): 6.54,
     ("Congo Kinshasa", "Russie"): 0.128,
     ("Russie", "Congo Kinshasa"): 6.54,
-    ("Tchad", "Russie"): 0.128,
     ("Russie", "Tchad"): 6.54
 }
 
@@ -75,7 +74,6 @@ FIXED_FEES = {
     ("Russie", "Congo Brazzaville"): 25,
     ("Congo Kinshasa", "Russie"): 280,
     ("Russie", "Congo Kinshasa"): 25,
-    ("Tchad", "Russie"): 280,
     ("Russie", "Tchad"): 25
 }
 
@@ -943,7 +941,6 @@ def transfert_formulaire(transfert_id=None):
         ("Congo Brazzaville", "Congo Brazzaville"),
         ("Congo Kinshasa", "Congo Kinshasa"),
         ("Guinée", "Guinée"),
-        ("Tchad", "Tchad"),
         ("Cameroun", "Cameroun"),
         ("Sénégal", "Sénégal"),
         ("Burkina Faso", "Burkina Faso")
