@@ -168,6 +168,7 @@ socket.on('nouveau_transfert', (data) => {
 
   const row = document.createElement('tr');
   row.className = `${classe} tr-flash`;
+  row.setAttribute("data-id", data.id); // 👈 C'EST CE QUI MANQUE
 
   row.innerHTML = `
     <td>${data.sender_name}</td>
@@ -192,6 +193,10 @@ function activerBoutonsMarquer() {
       const row = this.closest("tr");
       const statusCell = row.querySelector("td:nth-child(6)");
       const actionCell = row.querySelector("td:nth-child(7)");
+      if (!transfertId || transfertId === "null" || transfertId === "undefined") {
+  alert("❌ ID de transfert manquant.");
+  return;
+}
 
       fetch("{{ url_for('marquer_effectue') }}", {
         method: "POST",
