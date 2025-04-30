@@ -168,7 +168,9 @@ socket.on('nouveau_transfert', (data) => {
 
   const row = document.createElement('tr');
   row.className = `${classe} tr-flash`;
-  row.setAttribute("data-id", data.id); // 👈 C'EST CE QUI MANQUE
+  row.setAttribute("data-id", data.id); // ✅ Ajouté
+
+  console.log("🆔 ID reçu pour bouton :", data.id); // ✅ Debug console
 
   row.innerHTML = `
     <td>${data.sender_name}</td>
@@ -190,13 +192,14 @@ function activerBoutonsMarquer() {
   document.querySelectorAll(".mark-button").forEach(button => {
     button.onclick = function () {
       const transfertId = this.dataset.id;
+      if (!transfertId || transfertId === "null" || transfertId === "undefined") {
+        alert("❌ ID de transfert manquant.");
+        return;
+      }
+
       const row = this.closest("tr");
       const statusCell = row.querySelector("td:nth-child(6)");
       const actionCell = row.querySelector("td:nth-child(7)");
-      if (!transfertId || transfertId === "null" || transfertId === "undefined") {
-  alert("❌ ID de transfert manquant.");
-  return;
-}
 
       fetch("{{ url_for('marquer_effectue') }}", {
         method: "POST",
@@ -218,23 +221,8 @@ function activerBoutonsMarquer() {
 }
 
 activerBoutonsMarquer();
-
-function filterTable() {
-  const input = document.getElementById("searchInput").value.toLowerCase();
-  const statusFilter = document.getElementById("statusFilter").value.toLowerCase();
-  const rows = document.querySelectorAll("#transfertTable tbody tr");
-
-  rows.forEach(row => {
-    const text = row.textContent.toLowerCase();
-    const status = row.cells[5]?.textContent.toLowerCase();
-    const matchSearch = text.includes(input);
-    const matchStatus = statusFilter === "tous" || status.includes(statusFilter);
-    row.style.display = matchSearch && matchStatus ? "" : "none";
-  });
-}
 </script>
 
-<!-- CSRF Token global -->
 <script>
   const csrfToken = "{{ csrf_token }}";
 </script>
