@@ -1226,26 +1226,16 @@ from flask import jsonify
 
 from flask import jsonify
 
-from flask_wtf.csrf import CSRFProtect
-
-csrf = CSRFProtect(app)
-
 @csrf.exempt
 @app.route('/marquer_effectue', methods=['POST'])
 def marquer_effectue():
-    transfert_id = request.form.get('transfert_id')
-    if not transfert_id:
-        return jsonify({'success': False}), 400
-
-    conn = sqlite3.connect('transfert.db')
-    c = conn.cursor()
-    c.execute("UPDATE pending_transfers SET status = 'effectué' WHERE id = ?", (transfert_id,))
-    conn.commit()
-    conn.close()
-
-    # ✅ Notification socket
-    socketio.emit('transfert_valide', {'transfert_id': int(transfert_id)})
-    return jsonify({'success': True})
+    try:
+        transfert_id = request.form.get('transfert_id')
+        # ... (ton code habituel ici)
+        return jsonify({"success": True})
+    except Exception as e:
+        print(f"💥 ERREUR dans /marquer_effectue : {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/init_db')
 def run_init_db():
