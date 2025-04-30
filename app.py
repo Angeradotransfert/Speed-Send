@@ -1232,7 +1232,6 @@ from flask import jsonify
 
 from flask import jsonify
 
-@csrf.exempt
 @app.route('/marquer_effectue', methods=['POST'])
 def marquer_effectue():
     try:
