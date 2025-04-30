@@ -2,16 +2,75 @@
 
 {% block content %}
 <style>
-    /* Ton CSS original conservé */
-    body { background: linear-gradient(135deg, #c3dafe, #e0e7ff); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px 20px; }
-    .form-card { background: white; max-width: 800px; margin: auto; padding: 30px 40px; border-radius: 16px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); animation: fadeIn 0.5s ease-in-out; }
-    h2 { color: #1e3a8a; font-weight: bold; text-align: center; margin-bottom: 30px; }
-    label { font-weight: 600; margin-top: 10px; color: #333; }
-    .form-control, .form-select { margin-bottom: 15px; border-radius: 8px; padding: 10px; border: 1px solid #ccc; }
-    button { background-color: #2563eb; color: white; border: none; padding: 12px 24px; font-weight: bold; border-radius: 8px; margin-top: 20px; width: 100%; transition: background-color 0.3s ease; }
-    button:hover { background-color: #1d4ed8; }
-    @keyframes fadeIn { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
-    .flag-preview { font-size: 2em; margin-top: 5px; }
+    body {
+        background: linear-gradient(135deg, #c3dafe, #e0e7ff);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding: 40px 20px;
+    }
+
+    .form-card {
+        background: white;
+        max-width: 800px;
+        margin: auto;
+        padding: 30px 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    h2 {
+        color: #1e3a8a;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+        color: #333;
+    }
+
+    .form-control,
+    .form-select {
+        margin-bottom: 15px;
+        border-radius: 8px;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+
+    button {
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-weight: bold;
+        border-radius: 8px;
+        margin-top: 20px;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #1d4ed8;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .flag-preview {
+        font-size: 2em;
+        margin-top: 5px;
+    }
 </style>
 
 <div class="form-card">
@@ -20,15 +79,15 @@
         {{ form.hidden_tag() }}
 
         {% if form.errors %}
-            <div style="background-color: #fee2e2; border: 1px solid #f87171; color: #b91c1c; padding: 15px; margin-bottom: 20px; border-radius: 10px;">
-                <ul style="list-style-type: none; padding-left: 0; margin: 0;">
-                    {% for field, errors in form.errors.items() %}
-                        {% for error in errors %}
-                            <li>❗ {{ error }}</li>
-                        {% endfor %}
+        <div style="background-color: #fee2e2; border: 1px solid #f87171; color: #b91c1c; padding: 15px; margin-bottom: 20px; border-radius: 10px;">
+            <ul style="list-style-type: none; padding-left: 0; margin: 0;">
+                {% for field, errors in form.errors.items() %}
+                    {% for error in errors %}
+                        <li>❗ {{ error }}</li>
                     {% endfor %}
-                </ul>
-            </div>
+                {% endfor %}
+            </ul>
+        </div>
         {% endif %}
 
         <label for="nom_expediteur">👤 Nom de l'expéditeur</label>
@@ -71,105 +130,30 @@
 </div>
 
 <script>
-    const drapeaux = {
-        "Russie": "🇷🇺",
-        "Côte d'Ivoire": "🇨🇮",
-        "Congo Brazzaville": "🇨🇬",
-        "Congo Kinshasa": "🇨🇩",
-        "Guinée": "🇬🇳",
-        "Cameroun": "🇨🇲",
-        "Sénégal": "🇸🇳",
-        "Burkina Faso": "🇧🇫"
-    };
+const drapeaux = {
+  "Russie": "🇷🇺",
+  "Côte d'Ivoire": "🇨🇮",
+  "Congo Brazzaville": "🇨🇬",
+  "Congo Kinshasa": "🇨🇩",
+  "Guinée": "🇬🇳",
+  "Cameroun": "🇨🇲",
+  "Sénégal": "🇸🇳",
+  "Burkina Faso": "🇧🇫"
+};
 
-    document.getElementById("pays_envoi").addEventListener("change", function () {
-        const drapeau = drapeaux[this.value] || "";
-        document.getElementById("flag-envoi").innerText = drapeau;
-    });
+document.getElementById("pays_envoi").addEventListener("change", function () {
+  const drapeau = drapeaux[this.value] || "";
+  document.getElementById("flag-envoi").innerText = drapeau;
+});
 
-    document.getElementById("pays_destinataire").addEventListener("change", function () {
-        const drapeau = drapeaux[this.value] || "";
-        document.getElementById("flag-destinataire").innerText = drapeau;
-    });
+document.getElementById("pays_destinataire").addEventListener("change", function () {
+  const drapeau = drapeaux[this.value] || "";
+  document.getElementById("flag-destinataire").innerText = drapeau;
+});
 </script>
 
 <script>
-    const settings = {
-        "Russie": {
-            indicatif: "+7",
-            devise: "RUB",
-            moyens: ["Tinkoff", "Sberbank"]
-        },
-        "Côte d'Ivoire": {
-            indicatif: "+225",
-            devise: "XOF",
-            moyens: ["Orange Money", "MTN", "Wave", "Moov"]
-        },
-        "Guinée": {
-            indicatif: "+224",
-            devise: "XOF",
-            moyens: ["Orange Money Guinée", "MTN Mobile Money"]
-        },
-        "Sénégal": {
-            indicatif: "+221",
-            devise: "XOF",
-            moyens: ["Wave Sénégal", "Orange Money Sénégal"]
-        },
-        "Cameroun": {
-            indicatif: "+237",
-            devise: "XAF",
-            moyens: ["Orange Money Cameroun"]
-        },
-        "Burkina Faso": {
-            indicatif: "+226",
-            devise: "XOF",
-            moyens: ["Orange Money Burkina"]
-        },
-        "Congo Brazzaville": {
-            indicatif: "+242",
-            devise: "XAF",
-            moyens: ["MTN", "Airtel Money"]
-        },
-        "Congo Kinshasa": {
-            indicatif: "+243",
-            devise: "XAF",
-            moyens: ["Airtel Money"]
-        }
-    };
-
-    function updateForm(champPays, champNum, champMoyen, champDevise) {
-        const pays = document.getElementById(champPays).value;
-        if (settings[pays]) {
-            document.getElementById(champNum).value = settings[pays].indicatif + " ";
-
-            const deviseSelect = document.getElementById(champDevise);
-            for (let i = 0; i < deviseSelect.options.length; i++) {
-                if (deviseSelect.options[i].value === settings[pays].devise) {
-                    deviseSelect.selectedIndex = i;
-                    break;
-                }
-            }
-
-            const moyenSelect = document.getElementById(champMoyen);
-            moyenSelect.innerHTML = "";
-            settings[pays].moyens.forEach(function(m) {
-                const option = document.createElement('option');
-                option.value = m;
-                option.textContent = m;
-                moyenSelect.appendChild(option);
-            });
-        }
-    }
-
-    document.getElementById('pays_envoi').addEventListener('change', function() {
-        updateForm('pays_envoi', 'numero_expediteur', 'methode_envoi', 'devise_expediteur');
-    });
-
-    document.getElementById('pays_destinataire').addEventListener('change', function() {
-        updateForm('pays_destinataire', 'numero_destinataire', 'methode_reception', 'devise_destinataire');
-    });
-
-    const formatNumeros = {
+const formatNumeros = {
   "Côte d'Ivoire": 10,
   "Russie": 10,
   "Guinée": 9,
@@ -183,21 +167,22 @@
 document.getElementById("numero_expediteur").addEventListener("input", function () {
   const pays = document.getElementById("pays_envoi").value;
   const longueurMax = formatNumeros[pays];
-  const sansIndicatif = this.value.replace(/[^0-9]/g, "").replace(/^\+?\d{1,4}/, ""); // enlève indicatif
+  const sansIndicatif = this.value.replace(/[^0-9]/g, "").replace(/^\+?\d{1,4}/, "");
   if (sansIndicatif.length > longueurMax) {
-    this.value = this.value.slice(0, this.value.length - 1); // empêche de dépasser
+    this.value = this.value.slice(0, this.value.length - 1);
+  }
+});
+
+document.querySelector("form").addEventListener("submit", function (e) {
+  const pays = document.getElementById("pays_envoi").value;
+  const numero = document.getElementById("numero_expediteur").value.replace(/[^0-9]/g, "");
+  const attendu = formatNumeros[pays];
+
+  if (!attendu || numero.length !== attendu) {
+    e.preventDefault();
+    alert(`⚠️ Le numéro de l’expéditeur doit contenir exactement ${attendu} chiffres pour ${pays}.`);
+    return false;
   }
 });
 </script>
 {% endblock %}
-// Forcer l'affichage du drapeau au chargement si une valeur est déjà sélectionnée
-window.addEventListener('DOMContentLoaded', () => {
-  const paysEnvoi = document.getElementById("pays_envoi").value;
-  const drapeauEnvoi = drapeaux[paysEnvoi] || "";
-  document.getElementById("flag-envoi").innerText = drapeauEnvoi;
-
-  const paysDest = document.getElementById("pays_destinataire").value;
-  const drapeauDest = drapeaux[paysDest] || "";
-  document.getElementById("flag-destinataire").innerText = drapeauDest;
-});
-
