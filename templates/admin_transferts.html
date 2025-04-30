@@ -189,7 +189,6 @@ function activerBoutonsMarquer() {
   document.querySelectorAll(".mark-button").forEach(button => {
     button.onclick = function () {
       const transfertId = this.dataset.id;
-      const csrfToken = "{{ csrf_token }}";
       const row = this.closest("tr");
       const statusCell = row.querySelector("td:nth-child(6)");
       const actionCell = row.querySelector("td:nth-child(7)");
@@ -228,6 +227,11 @@ function filterTable() {
     row.style.display = matchSearch && matchStatus ? "" : "none";
   });
 }
+</script>
+
+<!-- CSRF Token global -->
+<script>
+  const csrfToken = "{{ csrf_token }}";
 </script>
 
 </body>
