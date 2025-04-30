@@ -112,7 +112,7 @@ add_num_expediteur_column()
 
 app = Flask(__name__)
 
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="https://speed-send.onrender.com")
 
 csrf = CSRFProtect(app)
 limiter = Limiter(get_remote_address)
@@ -1302,5 +1302,7 @@ def open_browser():
 threading.Timer(1.5, open_browser).start()
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)# Utilise HTTP en mode développement
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(app, host="0.0.0.0", port=port)
+
 
