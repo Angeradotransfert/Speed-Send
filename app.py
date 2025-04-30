@@ -652,41 +652,44 @@ load_dotenv()
 
 FLW_SECRET_KEY = os.getenv("FLW_SECRET_KEY")
 
-@app.route('/payer', methods=['GET', 'POST'])
+@app.route('/payer', methods=['POST'])
 def payer():
-    if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        amount = request.form['amount']
-        currency = request.form['currency']
+    name = request.form['name']
+    email = request.form['email']
+    amount = request.form['amount']
+    currency = request.form['currency']
 
-        data = {
-            "tx_ref": f"TRX-{random.randint(10000,99999)}",
-            "amount": amount,
-            "currency": currency,
-            "redirect_url": "https://speed-send.onrender.com/flutterwave_callback",
-            "customer": {
-                "email": email,
-                "name": name
-            },
-            "customizations": {
-                "title": "SpeedSend - Envoi d'argent",
-                "description": "Paiement sécurisé via Flutterwave"
-            }
+    data = {
+        "tx_ref": f"TRX-{os.urandom(3).hex()}",
+        "amount": amount,
+        "currency": currency,
+        "redirect_url": "https://speed-send.onrender.com/flutterwave_callback",
+        "customer": {"email": email, "name": name},
+        "customizations": {
+            "title": "SpeedSend - Envoi d'argent",
+            "description": "Paiement sécurisé via Flutterwave"
         }
+    }
 
-        headers = {
-            "Authorization": f"Bearer {FLW_SECRET_KEY}",
-            "Content-Type": "application/json"
-        }
+    headers = {
+        "Authorization": f"Bearer {FLW_SECRET_KEY}",
+        "Content-Type": "application/json"
+    }
 
-        response = requests.post("https://api.flutterwave.com/v3/payments", json=data, headers=headers)
+    def lancer_paiement():
+        try:
+            response = requests.post("https://api.flutterwave.com/v3/payments", json=data, headers=headers)
+            if response.status_code == 200:
+                payment_link = response.json()['data']['link']
+                print(f"🔗 Lien de paiement généré : {payment_link}")
+                # Idéalement, stocker ce lien côté serveur (BDD ou cache) pour rediriger ensuite
+            else:
+                print(f"Erreur Flutterwave : {response.text}")
+        except Exception as e:
+            print(f"Exception pendant le paiement : {e}")
 
-        if response.status_code == 200:
-            payment_link = response.json()['data']['link']
-            return redirect(payment_link)
-        else:
-            return f"Erreur Flutterwave : {response.text}"
+    threading.Thread(target=lancer_paiement).start()
+    return "✅ Paiement en cours de traitement. Vous serez redirigé."
 
     return render_template('payer.html')
 
