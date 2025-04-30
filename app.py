@@ -1069,7 +1069,13 @@ def transfert_formulaire(transfert_id=None):
             numero_expediteur, rate, converted, currency_dest
         ))
         conn.commit()
+
+        # Récupérer l’ID après insertion
+        c.execute('SELECT last_insert_rowid()')
+        transfert_id = c.fetchone()[0]
+
         conn.close()
+
 
         # ✅ Envoie le transfert au tableau admin en temps réel
         socketio.emit('nouveau_transfert', {
