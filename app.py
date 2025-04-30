@@ -112,7 +112,8 @@ add_num_expediteur_column()
 
 app = Flask(__name__)
 
-socketio = SocketIO(app, cors_allowed_origins="https://speed-send.onrender.com")
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 
 csrf = CSRFProtect(app)
 limiter = Limiter(get_remote_address)
@@ -663,7 +664,7 @@ def payer():
             "tx_ref": f"TRX-{random.randint(10000,99999)}",
             "amount": amount,
             "currency": currency,
-            "redirect_url": "http://127.0.0.1:5000/flutterwave_callback",
+            "redirect_url": "https://speed-send.onrender.com/flutterwave_callback",
             "customer": {
                 "email": email,
                 "name": name
@@ -1291,15 +1292,6 @@ def debug_list_img():
     path = os.path.join(app.root_path, 'static', 'img')
     return '<br>'.join(os.listdir(path))
 
-
-import webbrowser
-import threading
-
-def open_browser():
-    webbrowser.open_new("http://127.0.0.1:5000")
-
-# Lancer dans un thread séparé pour ne pas bloquer l'app
-threading.Timer(1.5, open_browser).start()
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
