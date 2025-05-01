@@ -29,6 +29,11 @@ from flask_wtf.csrf import CSRFProtect
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, FloatField, HiddenField, SubmitField
 from wtforms.validators import DataRequired
+from wtforms.validators import ValidationError
+
+def must_be_full_name(form, field):
+    if len(field.data.strip().split()) < 2:
+        raise ValidationError("Veuillez entrer le prénom et le nom.")
 
 
 load_dotenv()  # charge le fichier .env
@@ -134,7 +139,7 @@ NUMERO_RUSSIE = os.getenv("NUMERO_RUSSIE")
 NUMERO_COTEIVOIRE = os.getenv("NUMERO_COTEIVOIRE")
 
 class TransfertForm(FlaskForm):
-    nom_expediteur = StringField("Nom de l'expéditeur", validators=[DataRequired()])
+    nom_expediteur = StringField("Nom complet de l'expéditeur", validators=[DataRequired(), must_be_full_name])
     pays_envoi = SelectField("Pays d'envoi", choices=[
         ("Russie", "Russie"),
         ("Côte d'Ivoire", "Côte d'Ivoire"),
@@ -184,7 +189,7 @@ class TransfertForm(FlaskForm):
         ("Burkina Faso", "Burkina Faso")
     ], validators=[DataRequired()])
 
-    nom_destinataire = StringField("Nom du destinataire", validators=[DataRequired()])
+    nom_destinataire = StringField("Nom complet du destinataire", validators=[DataRequired(), must_be_full_name])
     numero_destinataire = StringField("Numéro du destinataire", validators=[DataRequired()])
 
     methode_reception = SelectField("Méthode de réception", choices=[

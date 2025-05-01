@@ -72,14 +72,19 @@
             </div>
         {% endif %}
 
-        <label for="nom_expediteur">👤 Nom de l'expéditeur</label>
-        {{ form.nom_expediteur(class="form-control", id="nom_expediteur") }}
+        <label for="nom_expediteur">👤 Nom complet de l'expéditeur (Nom Prénom)</label>
+        {{ form.nom_expediteur(class="form-control", id="nom_expediteur", placeholder="Exemple Jean Touré") }}
+
+        {% for error in form.nom_expediteur.errors %}
+    <small style="color:red;">❗ {{ error }}</small>
+{% endfor %}
+
 
         <label for="pays_envoi">🌍 Pays d'envoi</label>
         {{ form.pays_envoi(class="form-select", id="pays_envoi") }}
 
         <label for="numero_expediteur">📞 Numéro de l'expéditeur</label>
-        <input type="tel" id="numero_expediteur" name="numero_expediteur" class="form-control" placeholder="Numéro de l'expéditeur">
+        {{ form.numero_expediteur(class="form-control", id="numero_expediteur", type="tel", placeholder="Numéro de l'expéditeur") }}
 
         <label for="methode_envoi">🏦 Méthode d'envoi</label>
         {{ form.methode_envoi(class="form-select", id="methode_envoi") }}
@@ -93,11 +98,16 @@
         <label for="pays_destinataire">🌍 Pays du destinataire</label>
         {{ form.pays_destinataire(class="form-select", id="pays_destinataire") }}
 
-        <label for="nom_destinataire">👤 Nom du destinataire</label>
-        {{ form.nom_destinataire(class="form-control", id="nom_destinataire") }}
+        <label for="nom_destinataire">👤 Nom complet du destinataire (Nom Prénom)</label>
+        {{ form.nom_destinataire(class="form-control", id="nom_destinataire", placeholder="Exemple Fatou Koné") }}
+
+        {% for error in form.nom_destinataire.errors %}
+    <small style="color:red;">❗ {{ error }}</small>
+{% endfor %}
+
 
         <label for="numero_destinataire">📱 Numéro du destinataire</label>
-        <input type="tel" id="numero_destinataire" name="numero_destinataire" class="form-control" placeholder="Numéro du destinataire">
+        {{ form.numero_destinataire(class="form-control", id="numero_destinataire", type="tel", placeholder="Numéro du destinataire") }}
 
         <label for="methode_reception">💳 Méthode de réception</label>
         {{ form.methode_reception(class="form-select", id="methode_reception") }}
@@ -118,19 +128,34 @@
   let cleaveDest = null;
 
   function updateCleaveFormatter(inputId, countryCode, isExpediteur) {
-    const region = countryCode.toUpperCase();
+  const region = countryCode.toUpperCase();
 
-    if (isExpediteur && cleaveExp) cleaveExp.destroy();
-    if (!isExpediteur && cleaveDest) cleaveDest.destroy();
+  // Détruit l'ancien formatteur si déjà présent
+  if (isExpediteur && cleaveExp) cleaveExp.destroy();
+  if (!isExpediteur && cleaveDest) cleaveDest.destroy();
 
-    const cleave = new Cleave(inputId, {
-      phone: true,
-      phoneRegionCode: region
-    });
-
-    if (isExpediteur) cleaveExp = cleave;
-    else cleaveDest = cleave;
+  // Choix de format manuel pour certains pays
+  let blocks;
+  if (region === "CI") { // Côte d'Ivoire : 10 chiffres → 00 00 00 00 00
+    blocks = [2, 2, 2, 2, 2];
+  } else if (region === "RU") { // Russie : +7 000 000 00 21
+    blocks = [3, 3, 2, 2];
+  } else if (region === "CM") { // Cameroun, etc.
+    blocks = [3, 3, 2];
+  } else {
+    // Fallback générique
+    blocks = [3, 3, 2];
   }
+
+  const cleave = new Cleave(inputId, {
+    delimiters: [' ', ' ', ' ', ' ', ' '],
+    blocks: blocks,
+    numericOnly: true
+  });
+
+  if (isExpediteur) cleaveExp = cleave;
+  else cleaveDest = cleave;
+}
 
   const settings = {
     "Russie": { indicatif: "+7", devise: "RUB", moyens: ["Tinkoff", "Sberbank"] },
