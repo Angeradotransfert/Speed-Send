@@ -2,16 +2,58 @@
 
 {% block content %}
 <style>
-    /* Ton CSS original conservé */
-    body { background: linear-gradient(135deg, #c3dafe, #e0e7ff); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px 20px; }
-    .form-card { background: white; max-width: 800px; margin: auto; padding: 30px 40px; border-radius: 16px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); animation: fadeIn 0.5s ease-in-out; }
-    h2 { color: #1e3a8a; font-weight: bold; text-align: center; margin-bottom: 30px; }
-    label { font-weight: 600; margin-top: 10px; color: #333; }
-    .form-control, .form-select { margin-bottom: 15px; border-radius: 8px; padding: 10px; border: 1px solid #ccc; }
-    button { background-color: #2563eb; color: white; border: none; padding: 12px 24px; font-weight: bold; border-radius: 8px; margin-top: 20px; width: 100%; transition: background-color 0.3s ease; }
-    button:hover { background-color: #1d4ed8; }
-    @keyframes fadeIn { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+    body {
+        background: linear-gradient(135deg, #c3dafe, #e0e7ff);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding: 40px 20px;
+    }
+    .form-card {
+        background: white;
+        max-width: 800px;
+        margin: auto;
+        padding: 30px 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    h2 {
+        color: #1e3a8a;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+        color: #333;
+    }
+    .form-control, .form-select {
+        margin-bottom: 15px;
+        border-radius: 8px;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+    button {
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-weight: bold;
+        border-radius: 8px;
+        margin-top: 20px;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+    button:hover {
+        background-color: #1d4ed8;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css">
 
 <div class="form-card">
     <h2>🚀 Envoyer de l'argent</h2>
@@ -37,7 +79,7 @@
         {{ form.pays_envoi(class="form-select", id="pays_envoi") }}
 
         <label for="numero_expediteur">📞 Numéro de l'expéditeur</label>
-        {{ form.numero_expediteur(class="form-control", id="numero_expediteur") }}
+        <input type="tel" id="numero_expediteur" name="numero_expediteur" class="form-control" placeholder="Numéro de l'expéditeur">
 
         <label for="methode_envoi">🏦 Méthode d'envoi</label>
         {{ form.methode_envoi(class="form-select", id="methode_envoi") }}
@@ -55,7 +97,7 @@
         {{ form.nom_destinataire(class="form-control", id="nom_destinataire") }}
 
         <label for="numero_destinataire">📱 Numéro du destinataire</label>
-        {{ form.numero_destinataire(class="form-control", id="numero_destinataire") }}
+        <input type="tel" id="numero_destinataire" name="numero_destinataire" class="form-control" placeholder="Numéro du destinataire">
 
         <label for="methode_reception">💳 Méthode de réception</label>
         {{ form.methode_reception(class="form-select", id="methode_reception") }}
@@ -67,86 +109,118 @@
     </form>
 </div>
 
-<!-- ✨ SCRIPT corrigé pour gérer séparément devise expéditeur / destinataire -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
+
 <script>
-    const settings = {
-        "Russie": {
-            indicatif: "+7",
-            devise: "RUB",
-            moyens: ["Tinkoff", "Sberbank"]
-        },
-        "Côte d'Ivoire": {
-            indicatif: "+225",
-            devise: "XOF",
-            moyens: ["Orange Money", "MTN", "Wave", "Moov"]
-        },
-        "Guinée": {
-            indicatif: "+224",
-            devise: "XOF",
-            moyens: ["Orange Money Guinée", "MTN Mobile Money"]
-        },
-        "Sénégal": {
-            indicatif: "+221",
-            devise: "XOF",
-            moyens: ["Wave Sénégal", "Orange Money Sénégal"]
-        },
-        "Cameroun": {
-            indicatif: "+237",
-            devise: "XAF",
-            moyens: ["Orange Money Cameroun"]
-        },
-        "Burkina Faso": {
-            indicatif: "+226",
-            devise: "XOF",
-            moyens: ["Orange Money Burkina"]
-        },
-        "Congo Brazzaville": {
-            indicatif: "+242",
-            devise: "XAF",
-            moyens: ["MTN", "Airtel Money"]
-        },
-        "Congo Kinshasa": {
-            indicatif: "+243",
-            devise: "XAF",
-            moyens: ["Airtel Money"]
-        },
-        "Tchad": {
-            indicatif: "+235",
-            devise: "XAF",
-            moyens: ["Airtel Money"]
-        }
+  let cleaveExp = null;
+  let cleaveDest = null;
+
+  function updateCleaveFormatter(inputId, countryCode, isExpediteur) {
+    const region = countryCode.toUpperCase();
+
+    if (isExpediteur && cleaveExp) cleaveExp.destroy();
+    if (!isExpediteur && cleaveDest) cleaveDest.destroy();
+
+    const cleave = new Cleave(inputId, {
+      phone: true,
+      phoneRegionCode: region
+    });
+
+    if (isExpediteur) cleaveExp = cleave;
+    else cleaveDest = cleave;
+  }
+
+  const settings = {
+    "Russie": { indicatif: "+7", devise: "RUB", moyens: ["Tinkoff", "Sberbank"] },
+    "Côte d'Ivoire": { indicatif: "+225", devise: "XOF", moyens: ["Orange Money", "MTN", "Wave", "Moov"] },
+    "Guinée": { indicatif: "+224", devise: "XOF", moyens: ["Orange Money Guinée", "MTN Mobile Money"] },
+    "Sénégal": { indicatif: "+221", devise: "XOF", moyens: ["Wave Sénégal", "Orange Money Sénégal"] },
+    "Cameroun": { indicatif: "+237", devise: "XAF", moyens: ["Orange Money Cameroun"] },
+    "Burkina Faso": { indicatif: "+226", devise: "XOF", moyens: ["Orange Money Burkina"] },
+    "Congo Brazzaville": { indicatif: "+242", devise: "XAF", moyens: ["MTN", "Airtel Money"] },
+    "Congo Kinshasa": { indicatif: "+243", devise: "XAF", moyens: ["Airtel Money"] },
+    "Tchad": { indicatif: "+235", devise: "XAF", moyens: ["Airtel Money"] }
+  };
+
+  function getCountryISO(pays) {
+    const map = {
+      "Russie": "ru",
+      "Côte d'Ivoire": "ci",
+      "Guinée": "gn",
+      "Sénégal": "sn",
+      "Cameroun": "cm",
+      "Burkina Faso": "bf",
+      "Congo Brazzaville": "cg",
+      "Congo Kinshasa": "cd",
+      "Tchad": "td"
     };
+    return map[pays] || "ci";
+  }
 
-    function updateForm(champPays, champNum, champMoyen, champDevise) {
-        const pays = document.getElementById(champPays).value;
-        if (settings[pays]) {
-            document.getElementById(champNum).value = settings[pays].indicatif + " ";
+  document.addEventListener("DOMContentLoaded", function () {
+    updateCleaveFormatter("#numero_expediteur", "ci", true);
+    updateCleaveFormatter("#numero_destinataire", "ru", false);
+  });
 
-            const deviseSelect = document.getElementById(champDevise);
-            for (let i = 0; i < deviseSelect.options.length; i++) {
-                if (deviseSelect.options[i].value === settings[pays].devise) {
-                    deviseSelect.selectedIndex = i;
-                    break;
-                }
-            }
+  document.getElementById("pays_envoi").addEventListener("change", function () {
+    updateForm("pays_envoi", "numero_expediteur", "methode_envoi", "devise_expediteur");
+    const iso = getCountryISO(this.value);
+    itiExp.setCountry(iso);
+    updateCleaveFormatter("#numero_expediteur", iso, true);
+  });
 
-            const moyenSelect = document.getElementById(champMoyen);
-            moyenSelect.innerHTML = ""; // Vider
-            settings[pays].moyens.forEach(function(m) {
-                const option = document.createElement('option');
-                option.value = m;
-                option.textContent = m;
-                moyenSelect.appendChild(option);
-            });
+  document.getElementById("pays_destinataire").addEventListener("change", function () {
+    updateForm("pays_destinataire", "numero_destinataire", "methode_reception", "devise_destinataire");
+    const iso = getCountryISO(this.value);
+    itiDest.setCountry(iso);
+    updateCleaveFormatter("#numero_destinataire", iso, false);
+  });
+
+  const inputExp = document.querySelector("#numero_expediteur");
+  const inputDest = document.querySelector("#numero_destinataire");
+
+  const itiExp = window.intlTelInput(inputExp, {
+    separateDialCode: true,
+    initialCountry: "ci",
+    formatOnDisplay: true,
+    nationalMode: true,
+    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.min.js"
+  });
+
+  const itiDest = window.intlTelInput(inputDest, {
+    separateDialCode: true,
+    initialCountry: "ru",
+    formatOnDisplay: true,
+    nationalMode: true,
+    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.min.js"
+  });
+
+  document.querySelector("form").addEventListener("submit", function () {
+    inputExp.value = itiExp.getNumber(intlTelInputUtils.numberFormat.E164);
+    inputDest.value = itiDest.getNumber(intlTelInputUtils.numberFormat.E164);
+  });
+
+  function updateForm(champPays, champNum, champMoyen, champDevise) {
+    const pays = document.getElementById(champPays).value;
+    if (settings[pays]) {
+      const deviseSelect = document.getElementById(champDevise);
+      for (let i = 0; i < deviseSelect.options.length; i++) {
+        if (deviseSelect.options[i].value === settings[pays].devise) {
+          deviseSelect.selectedIndex = i;
+          break;
         }
+      }
+      const moyenSelect = document.getElementById(champMoyen);
+      moyenSelect.innerHTML = "";
+      settings[pays].moyens.forEach(function(m) {
+        const option = document.createElement('option');
+        option.value = m;
+        option.textContent = m;
+        moyenSelect.appendChild(option);
+      });
     }
-
-    document.getElementById('pays_envoi').addEventListener('change', function() {
-        updateForm('pays_envoi', 'numero_expediteur', 'methode_envoi', 'devise_expediteur');
-    });
-
-    document.getElementById('pays_destinataire').addEventListener('change', function() {
-        updateForm('pays_destinataire', 'numero_destinataire', 'methode_reception', 'devise_destinataire');
-    });
+  }
 </script>
 {% endblock %}
