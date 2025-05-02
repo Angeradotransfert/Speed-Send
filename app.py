@@ -1279,16 +1279,22 @@ def run_init_db():
 BOT_TOKEN = '8069658289:AAHzBhZbm8opr1rfGBclNpygLx4BSxD6plg'
 CHAT_ID = 'TON_CHAT_ID_ICI'
 
+import threading
+import requests
+
 def send_telegram_message(message):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {
-        'chat_id': 7543021330,
-        'text': message
-    }
-    try:
-        requests.post(url, data=payload)
-    except Exception as e:
-        print("Erreur lors de l'envoi Telegram :", e)
+    def envoyer():
+        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+        payload = {
+            'chat_id': 7543021330,
+            'text': message
+        }
+        try:
+            requests.post(url, data=payload)
+        except Exception as e:
+            print("Erreur lors de l'envoi Telegram :", e)
+
+    threading.Thread(target=envoyer).start()
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
