@@ -1330,6 +1330,24 @@ def annuler_transfert(transfert_id):
     if form.validate_on_submit():
         conn = sqlite3.connect('transfert.db')
         c = conn.cursor()
+        # Récupérer les infos du transfert avant de le supprimer
+        c.execute("SELECT sender_name, amount, currency, recipient_name FROM pending_transfers WHERE id = ?",
+                  (transfert_id,))
+        transfert = c.fetchone()
+
+        if transfert:
+            sender_name, amount, currency, recipient_name = transfert
+
+            # 🔔 Envoi Telegram
+            send_telegram_message(
+                f"❌ Transfert annulé !\n"
+                f"👤 Expéditeur : {sender_name}\n"
+                f"💸 Montant : {amount} {currency}\n"
+                f"📲 Destinataire : {recipient_name}\n"
+                f"🗑️ ID Transfert : {transfert_id}"
+            )
+
+        # Supprimer ensuite
         c.execute("DELETE FROM pending_transfers WHERE id = ?", (transfert_id,))
         conn.commit()
         conn.close()
