@@ -116,6 +116,7 @@
 
     <form method="POST" action="{{ url_for('transfert_formulaire') }}">
         <div id="bloc-expediteur">
+         <h3 style="color: #1e3a8a; font-weight: bold; margin-bottom: 15px;">🧍‍♂️ Informations de l’expéditeur</h3>
         {{ form.hidden_tag() }}
 
         {% if form.errors %}
@@ -156,6 +157,9 @@
          </div>
 
 <div id="bloc-destinataire" style="display: none;">
+
+ <h3 style="color: #1e3a8a; font-weight: bold; margin-bottom: 15px;">🎯 Informations du destinataire</h3>
+
 
         <label for="pays_destinataire">🌍 Pays du destinataire</label>
         {{ form.pays_destinataire(class="form-select", id="pays_destinataire") }}
