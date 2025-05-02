@@ -51,12 +51,58 @@
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
     }
+
+    .form-navigation {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.form-navigation button {
+  background-color: #1e3a8a;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  margin: 10px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-navigation button:hover {
+  background-color: #2563eb;
+}
+
+    #bloc-expediteur, #bloc-destinataire {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+    @keyframes pop {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css">
 
 <div class="form-card">
     <h2>🚀 Envoyer de l'argent</h2>
+
+    <div id="progress-container" style="margin-bottom: 20px;">
+  <div style="font-weight: bold; color: #1e3a8a; text-align: center; margin-bottom: 10px;" id="progress-label">
+  Étape 1 sur 2 <span id="checkmark" style="display: none; font-size: 18px; margin-left: 8px;">✅</span>
+</div>
+  <div style="background-color: #e5e7eb; border-radius: 10px; height: 10px; overflow: hidden;">
+    <div id="progress-bar" style="background-color: #2563eb; width: 50%; height: 100%; transition: width 0.4s;"></div>
+  </div>
+</div>
 
    {% with messages = get_flashed_messages() %}
   {% if messages %}
@@ -69,6 +115,7 @@
 {% endwith %}
 
     <form method="POST" action="{{ url_for('transfert_formulaire') }}">
+        <div id="bloc-expediteur">
         {{ form.hidden_tag() }}
 
         {% if form.errors %}
@@ -99,11 +146,16 @@
         <label for="methode_envoi">🏦 Méthode d'envoi</label>
         {{ form.methode_envoi(class="form-select", id="methode_envoi") }}
 
+
         <label for="montant">💰 Montant</label>
         {{ form.montant(class="form-control", id="montant") }}
 
         <label for="devise_expediteur">💱 Devise de l'expéditeur</label>
         {{ form.devise_expediteur(class="form-select", id="devise_expediteur") }}
+
+         </div>
+
+<div id="bloc-destinataire" style="display: none;">
 
         <label for="pays_destinataire">🌍 Pays du destinataire</label>
         {{ form.pays_destinataire(class="form-select", id="pays_destinataire") }}
@@ -124,7 +176,13 @@
         <label for="devise_destinataire">💱 Devise du destinataire</label>
         {{ form.devise_destinataire(class="form-select", id="devise_destinataire") }}
 
-        <button type="submit">Envoyer</button>
+    <div style="text-align: center; margin-top: 20px;">
+  <button type="submit" class="btn-action">Envoyer</button>
+</div>
+
+
+    </div>
+
     </form>
 </div>
 
@@ -262,6 +320,69 @@
       setTimeout(() => flash.remove(), 500);
     }
   }, 5000);
+</script>
+
+<script>
+  function detectRemplissageExpediteur() {
+    const champs = [
+      'nom_expediteur',
+      'pays_envoi',
+      'numero_expediteur',
+      'methode_envoi',
+      'montant',
+      'devise_expediteur'
+    ];
+
+    // Surbrillance des champs vides
+    champs.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (el.value.trim() === '') {
+          el.style.border = '1px solid red';
+        } else {
+          el.style.border = '1px solid #ccc';
+        }
+      }
+    });
+
+    const remplis = champs.every(id => {
+      const el = document.getElementById(id);
+      return el && el.value.trim() !== '';
+    });
+
+    const progressBar = document.getElementById("progress-bar");
+    const progressLabel = document.getElementById("progress-label");
+
+    if (remplis) {
+      document.getElementById('bloc-destinataire').style.display = 'block';
+      progressBar.style.width = '100%';
+      progressLabel.innerHTML = 'Étape 2 sur 2 <span id="checkmark" style="font-size: 18px; margin-left: 8px; animation: pop 0.3s ease;">✅</span>';
+    } else {
+      document.getElementById('bloc-destinataire').style.display = 'none';
+      progressBar.style.width = '50%';
+      progressLabel.textContent = 'Étape 1 sur 2';
+    }
+  }
+
+  // Active le suivi dès le chargement
+  document.addEventListener("DOMContentLoaded", function () {
+    detectRemplissageExpediteur();
+    const champsExp = [
+      'nom_expediteur',
+      'pays_envoi',
+      'numero_expediteur',
+      'methode_envoi',
+      'montant',
+      'devise_expediteur'
+    ];
+    champsExp.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', detectRemplissageExpediteur);
+        el.addEventListener('change', detectRemplissageExpediteur);
+      }
+    });
+  });
 </script>
 
 {% endblock %}
