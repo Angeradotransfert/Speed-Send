@@ -1276,7 +1276,7 @@ def run_init_db():
     return "✅ Base mise à jour avec la table external_transfers"
 
 # Configuration du bot Telegram
-BOT_TOKEN = '8069658289:AAHzBhZbm8opr1rfGBclNpygLx4BSxD6plg'
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = 'TON_CHAT_ID_ICI'
 
 import threading
