@@ -57,6 +57,17 @@
 
 <div class="form-card">
     <h2>🚀 Envoyer de l'argent</h2>
+
+    {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div style="background-color: #fee2e2; padding: 10px; color: #991b1b; border-radius: 5px; margin-bottom: 15px;">
+      {% for message in messages %}
+        {{ message }}
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
     <form method="POST" action="{{ url_for('transfert_formulaire') }}">
         {{ form.hidden_tag() }}
 
@@ -76,9 +87,8 @@
         {{ form.nom_expediteur(class="form-control", id="nom_expediteur", placeholder="Exemple Jean Touré") }}
 
         {% for error in form.nom_expediteur.errors %}
-    <small style="color:red;">❗ {{ error }}</small>
-{% endfor %}
-
+            <small style="color:red;">❗ {{ error }}</small>
+        {% endfor %}
 
         <label for="pays_envoi">🌍 Pays d'envoi</label>
         {{ form.pays_envoi(class="form-select", id="pays_envoi") }}
@@ -102,9 +112,8 @@
         {{ form.nom_destinataire(class="form-control", id="nom_destinataire", placeholder="Exemple Fatou Koné") }}
 
         {% for error in form.nom_destinataire.errors %}
-    <small style="color:red;">❗ {{ error }}</small>
-{% endfor %}
-
+            <small style="color:red;">❗ {{ error }}</small>
+        {% endfor %}
 
         <label for="numero_destinataire">📱 Numéro du destinataire</label>
         {{ form.numero_destinataire(class="form-control", id="numero_destinataire", type="tel", placeholder="Numéro du destinataire") }}
@@ -128,34 +137,72 @@
   let cleaveDest = null;
 
   function updateCleaveFormatter(inputId, countryCode, isExpediteur) {
-  const region = countryCode.toUpperCase();
+    const region = countryCode.toUpperCase();
+    if (isExpediteur && cleaveExp) cleaveExp.destroy();
+    if (!isExpediteur && cleaveDest) cleaveDest.destroy();
 
-  // Détruit l'ancien formatteur si déjà présent
-  if (isExpediteur && cleaveExp) cleaveExp.destroy();
-  if (!isExpediteur && cleaveDest) cleaveDest.destroy();
+    let blocks;
+    if (region === "CI") blocks = [2, 2, 2, 2, 2];
+    else if (region === "RU") blocks = [3, 3, 2, 2];
+    else if (region === "CM") blocks = [3, 3, 2];
+    else blocks = [3, 3, 2];
 
-  // Choix de format manuel pour certains pays
-  let blocks;
-  if (region === "CI") { // Côte d'Ivoire : 10 chiffres → 00 00 00 00 00
-    blocks = [2, 2, 2, 2, 2];
-  } else if (region === "RU") { // Russie : +7 000 000 00 21
-    blocks = [3, 3, 2, 2];
-  } else if (region === "CM") { // Cameroun, etc.
-    blocks = [3, 3, 2];
-  } else {
-    // Fallback générique
-    blocks = [3, 3, 2];
+    const cleave = new Cleave(inputId, {
+      delimiters: [' ', ' ', ' ', ' ', ' '],
+      blocks: blocks,
+      numericOnly: true
+    });
+
+    if (isExpediteur) cleaveExp = cleave;
+    else cleaveDest = cleave;
   }
 
-  const cleave = new Cleave(inputId, {
-    delimiters: [' ', ' ', ' ', ' ', ' '],
-    blocks: blocks,
-    numericOnly: true
+  const inputExp = document.querySelector("#numero_expediteur");
+  const inputDest = document.querySelector("#numero_destinataire");
+
+  const itiExp = window.intlTelInput(inputExp, {
+    separateDialCode: true,
+    initialCountry: "ci",
+    formatOnDisplay: true,
+    nationalMode: true,
+    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.min.js"
   });
 
-  if (isExpediteur) cleaveExp = cleave;
-  else cleaveDest = cleave;
-}
+  const itiDest = window.intlTelInput(inputDest, {
+    separateDialCode: true,
+    initialCountry: "ru",
+    formatOnDisplay: true,
+    nationalMode: true,
+    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.min.js"
+  });
+
+  document.querySelector("form").addEventListener("submit", function () {
+    try {
+      inputExp.value = itiExp.getNumber(intlTelInputUtils.numberFormat.E164);
+      inputDest.value = itiDest.getNumber(intlTelInputUtils.numberFormat.E164);
+    } catch (e) {
+      console.warn("intlTelInputUtils non chargé :", e);
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    updateCleaveFormatter("#numero_expediteur", "ci", true);
+    updateCleaveFormatter("#numero_destinataire", "ru", false);
+  });
+
+  document.getElementById("pays_envoi").addEventListener("change", function () {
+    updateForm("pays_envoi", "numero_expediteur", "methode_envoi", "devise_expediteur");
+    const iso = getCountryISO(this.value);
+    itiExp.setCountry(iso);
+    updateCleaveFormatter("#numero_expediteur", iso, true);
+  });
+
+  document.getElementById("pays_destinataire").addEventListener("change", function () {
+    updateForm("pays_destinataire", "numero_destinataire", "methode_reception", "devise_destinataire");
+    const iso = getCountryISO(this.value);
+    itiDest.setCountry(iso);
+    updateCleaveFormatter("#numero_destinataire", iso, false);
+  });
 
   const settings = {
     "Russie": { indicatif: "+7", devise: "RUB", moyens: ["Tinkoff", "Sberbank"] },
@@ -184,49 +231,6 @@
     return map[pays] || "ci";
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    updateCleaveFormatter("#numero_expediteur", "ci", true);
-    updateCleaveFormatter("#numero_destinataire", "ru", false);
-  });
-
-  document.getElementById("pays_envoi").addEventListener("change", function () {
-    updateForm("pays_envoi", "numero_expediteur", "methode_envoi", "devise_expediteur");
-    const iso = getCountryISO(this.value);
-    itiExp.setCountry(iso);
-    updateCleaveFormatter("#numero_expediteur", iso, true);
-  });
-
-  document.getElementById("pays_destinataire").addEventListener("change", function () {
-    updateForm("pays_destinataire", "numero_destinataire", "methode_reception", "devise_destinataire");
-    const iso = getCountryISO(this.value);
-    itiDest.setCountry(iso);
-    updateCleaveFormatter("#numero_destinataire", iso, false);
-  });
-
-  const inputExp = document.querySelector("#numero_expediteur");
-  const inputDest = document.querySelector("#numero_destinataire");
-
-  const itiExp = window.intlTelInput(inputExp, {
-    separateDialCode: true,
-    initialCountry: "ci",
-    formatOnDisplay: true,
-    nationalMode: true,
-    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.min.js"
-  });
-
-  const itiDest = window.intlTelInput(inputDest, {
-    separateDialCode: true,
-    initialCountry: "ru",
-    formatOnDisplay: true,
-    nationalMode: true,
-    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.min.js"
-  });
-
-  document.querySelector("form").addEventListener("submit", function () {
-    inputExp.value = itiExp.getNumber(intlTelInputUtils.numberFormat.E164);
-    inputDest.value = itiDest.getNumber(intlTelInputUtils.numberFormat.E164);
-  });
-
   function updateForm(champPays, champNum, champMoyen, champDevise) {
     const pays = document.getElementById(champPays).value;
     if (settings[pays]) {
@@ -248,4 +252,15 @@
     }
   }
 </script>
+<script>
+  // Disparaît automatiquement après 5 secondes
+  setTimeout(() => {
+    const flash = document.getElementById("flash-message");
+    if (flash) {
+      flash.style.opacity = "0";
+      setTimeout(() => flash.remove(), 500);
+    }
+  }, 5000);
+</script>
+
 {% endblock %}

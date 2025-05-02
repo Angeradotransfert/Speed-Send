@@ -13,6 +13,10 @@
         color: #333;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+    #animated-box {
+    position: relative;
+    z-index: 1;
+}
     .copy-btn { background-color: #2563eb; color: white; border: none; padding: 6px 12px; font-size: 14px; margin-left: 12px; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; }
     .copy-btn:hover { background-color: #1e40af; }
     .numero-anim { background: #fff7ed; color: #92400e; border-left: 6px solid #f97316; padding: 18px; margin-top: 25px; font-size: 18px; font-weight: bold; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); animation: fadeSlide 1s ease forwards; opacity: 0; transform: translateY(20px); }
@@ -52,15 +56,32 @@
         <span id="copied-msg" style="display:none; color:green; font-weight:bold;">✅ Numéro copié !</span>
     </div>
 
+
     <div class="countdown">
         ⏳ Veuillez effectuer le paiement dans : <span id="timer">10:00</span>
     </div>
 
     <form method="POST" action="{{ url_for('payer_confirme') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <input type="hidden" name="transfert_id" value="{{ transfert_id }}">
-        <button type="submit" class="btn-action">✅ J’ai payé</button>
-    </form>
+    {{ annulation_form.csrf_token }}
+    <input type="hidden" name="transfert_id" value="{{ transfert_id }}">
+    <button type="submit" class="btn-action">✅ J’ai payé</button>
+</form>
+
+   <form id="annulerForm" method="POST" action="{{ url_for('annuler_transfert', transfert_id=transfert_id) }}">
+    {{ annulation_form.hidden_tag() }}
+    {{ annulation_form.confirm(value='yes') }}  <!-- ✅ champ généré par WTForms -->
+    <button type="button" onclick="confirmerAnnulation()" style="background-color: #ef4444; color: white; padding: 10px 20px; border-radius: 8px; border: none;">
+        ❌ Annuler ce transfert
+    </button>
+</form>
+
+<script>
+  function confirmerAnnulation() {
+    if (confirm("❗ Êtes-vous sûr de vouloir annuler ce transfert ? Cette action est irréversible.")) {
+      document.getElementById("annulerForm").submit();
+    }
+  }
+</script>
 </div>
 
 <script>
@@ -115,6 +136,7 @@
     }
   });
 </script>
+
 {% endblock %}
 <style>
 @keyframes flash-success {
@@ -136,27 +158,4 @@
 }
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
-<script>
-  const socket = io();
-
-  socket.on('transfert_valide', function(data) {
-    const idPage = {{ transfert_id }};
-    if (data.transfert_id === idPage) {
-      const box = document.querySelector(".confirmation-card");
-      const msg = document.createElement("div");
-      msg.className = "animated-success";
-      msg.style.background = "#22c55e";
-      msg.style.color = "white";
-      msg.style.padding = "15px";
-      msg.style.fontWeight = "bold";
-      msg.style.borderRadius = "10px";
-      msg.style.marginBottom = "20px";
-
-      msg.innerHTML = `<span class="icon-check">✅</span>Votre transfert a été validé avec succès !`;
-
-      box.insertBefore(msg, box.firstChild);
-    }
-  });
-</script>
 

@@ -6,6 +6,9 @@ import sqlite3
 import string
 from unittest import result
 from flask_socketio import SocketIO, emit
+from flask_wtf import FlaskForm
+from wtforms import HiddenField
+
 
 
 
@@ -221,6 +224,12 @@ class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired()])
     password = PasswordField('Mot de passe', validators=[DataRequired()])
     submit = SubmitField('Se connecter')
+
+from wtforms.validators import DataRequired
+
+class AnnulationForm(FlaskForm):
+    confirm = HiddenField(validators=[DataRequired()])
+
 
 def init_db():
     conn = sqlite3.connect('transfert.db')
@@ -1143,8 +1152,8 @@ from flask_wtf.csrf import generate_csrf
 @app.route('/confirmer_transfert')
 def confirmer_transfert():
     sender_name        = request.args.get('sender_name')
-    total_source       = request.args.get('total_source')   # ← total payé
-    currency           = request.args.get('currency')       # devise source
+    total_source       = request.args.get('total_source')
+    currency           = request.args.get('currency')
     payment_method     = request.args.get('payment_method')
     recipient_name     = request.args.get('recipient_name')
     recipient_phone    = request.args.get('recipient_phone')
@@ -1155,14 +1164,13 @@ def confirmer_transfert():
     recipient_country  = request.args.get('recipient_country')
     numero_expediteur  = request.args.get('numero_expediteur')
 
-    # paramètres destinataire
-    exchange_rate    = request.args.get('exchange_rate')
-    converted_amount = request.args.get('converted_amount')
-    currency_dest    = request.args.get('currency_dest')
-    frais            = request.args.get('frais')
-    frais_currency   = request.args.get('frais_currency')
+    exchange_rate      = request.args.get('exchange_rate')
+    converted_amount   = request.args.get('converted_amount')
+    currency_dest      = request.args.get('currency_dest')
+    frais              = request.args.get('frais')
+    frais_currency     = request.args.get('frais_currency')
 
-    # ID du transfert
+    # Récupère l’ID du transfert
     conn = sqlite3.connect('transfert.db')
     c = conn.cursor()
     c.execute(
@@ -1173,12 +1181,15 @@ def confirmer_transfert():
     transfert_id = transfert[0] if transfert else None
     conn.close()
 
+    # Crée le mini formulaire d'annulation avec protection CSRF
+    annulation_form = AnnulationForm()
+
     return render_template(
         'confirmation_transfert.html',
         sender_name        = sender_name,
-        total_source       = total_source,      # total à payer (devise source)
-        currency           = currency,          # devise source
-        currency_dest      = currency_dest,     # devise destinataire
+        total_source       = total_source,
+        currency           = currency,
+        currency_dest      = currency_dest,
         payment_method     = payment_method,
         recipient_name     = recipient_name,
         recipient_phone    = recipient_phone,
@@ -1195,7 +1206,7 @@ def confirmer_transfert():
         frais_currency     = frais_currency,
         numero_russie      = NUMERO_RUSSIE,
         numero_cote        = NUMERO_COTEIVOIRE,
-        csrf_token         = generate_csrf()
+        annulation_form    = annulation_form  # ✅ c’est ce qui transmet le csrf_token
     )
 
 from flask import flash
@@ -1312,6 +1323,22 @@ def debug_list_img():
     path = os.path.join(app.root_path, 'static', 'img')
     return '<br>'.join(os.listdir(path))
 
+
+@app.route('/annuler_transfert/<int:transfert_id>', methods=['POST'])
+def annuler_transfert(transfert_id):
+    form = AnnulationForm()  # ✅ ne PAS ajouter request.form ici
+    if form.validate_on_submit():
+        conn = sqlite3.connect('transfert.db')
+        c = conn.cursor()
+        c.execute("DELETE FROM pending_transfers WHERE id = ?", (transfert_id,))
+        conn.commit()
+        conn.close()
+        flash("❌ Transfert annulé avec succès.")
+        return redirect(url_for('transfert_formulaire'))
+    else:
+        print("❌ Erreurs de validation :", form.errors)
+        flash("⚠️ Le formulaire est invalide. Erreur CSRF ou champ manquant.")
+        return redirect(url_for('transfert_formulaire'))
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
