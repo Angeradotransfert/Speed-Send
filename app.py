@@ -1355,10 +1355,10 @@ def annuler_transfert(transfert_id):
         flash("⚠️ Le formulaire est invalide. Erreur CSRF ou champ manquant.")
         return redirect(url_for('transfert_formulaire'))
 
-@app.route("/test-rate-limit")
-@limiter.limit("5 per minute")  # 5 requêtes par minute par IP
-def test_limit():
-    return "Tu n'es pas encore bloqué 👍"
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return render_template("429.html"), 429
 
 if __name__ == "__main__":
     import os
