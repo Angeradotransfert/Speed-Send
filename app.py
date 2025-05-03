@@ -44,8 +44,17 @@ app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 mail = Mail(app)
 socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 csrf = CSRFProtect(app)
-limiter = Limiter(key_func=get_remote_address)
-limiter.init_app(app)
+from redis import Redis
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+# Connexion à Redis via URL (extrait depuis .env)
+redis_connection = Redis.from_url(os.getenv('REDIS_URL'))
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    storage_uri=os.getenv('REDIS_URL'),
+)
 
 
 # --- Taux de change fixes ---
@@ -1346,6 +1355,10 @@ def annuler_transfert(transfert_id):
         flash("⚠️ Le formulaire est invalide. Erreur CSRF ou champ manquant.")
         return redirect(url_for('transfert_formulaire'))
 
+@app.route("/test-rate-limit")
+@limiter.limit("5 per minute")  # 5 requêtes par minute par IP
+def test_limit():
+    return "Tu n'es pas encore bloqué 👍"
 
 if __name__ == "__main__":
     import os
