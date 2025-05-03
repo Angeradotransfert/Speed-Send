@@ -44,7 +44,9 @@ app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 mail = Mail(app)
 socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 csrf = CSRFProtect(app)
-limiter = Limiter(app, key_func=get_remote_address)
+limiter = Limiter(key_func=get_remote_address)
+limiter.init_app(app)
+
 
 # --- Taux de change fixes ---
 FIXED_RATES = {
