@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: Speed-Send
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app -k eventlet --timeout 60"
+    envVars:
+      - key: REDIS_URL
+        value: "redis://default:AYAyAAIjcDFmZGJlNjI4ZjUyYmI0NTYxYjUxYTdjZGFiNDFhOGQ4ZXAxMA@grand-shiner-32818.upstash.io:6379"
+    plan: free
