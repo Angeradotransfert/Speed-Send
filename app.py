@@ -1,5 +1,7 @@
 import eventlet
 eventlet.monkey_patch()
+from flask_socketio import SocketIO
+socketio = SocketIO(app, async_mode='eventlet')
 import os
 import random
 import sqlite3
@@ -8,6 +10,8 @@ from unittest import result
 from flask_socketio import SocketIO, emit
 from flask_wtf import FlaskForm
 from wtforms import HiddenField
+
+
 
 
 
@@ -1364,7 +1368,8 @@ def annuler_transfert(transfert_id):
         flash("⚠️ Le formulaire est invalide. Erreur CSRF ou champ manquant.")
         return redirect(url_for('transfert_formulaire'))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     socketio.run(app, host="0.0.0.0", port=port)
 
