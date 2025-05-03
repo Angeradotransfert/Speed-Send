@@ -1,57 +1,52 @@
 import eventlet
 eventlet.monkey_patch()
-from flask_socketio import SocketIO
-socketio = SocketIO(app, async_mode='eventlet')
+
 import os
 import random
 import sqlite3
 import string
-from unittest import result
-from flask_socketio import SocketIO, emit
-from flask_wtf import FlaskForm
-from wtforms import HiddenField
-
-
-
-
-
-
-
-from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, session
-from flask_mail import Mail, Message
 import logging
-
-from flask_wtf import FlaskForm  # Ajout de cette ligne
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired
-
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 import bcrypt
+from dotenv import load_dotenv
+
+from flask import Flask, render_template, request, redirect, url_for, session
+from flask_socketio import SocketIO, emit
+from flask_mail import Mail, Message
+from flask_wtf import FlaskForm
 from flask_login import login_user, login_required, logout_user, current_user
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect
 
-from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, FloatField, HiddenField, SubmitField
-from wtforms.validators import DataRequired
-from wtforms.validators import ValidationError
+from wtforms import (
+    StringField, PasswordField, SubmitField, SelectField,
+    FloatField, HiddenField
+)
+from wtforms.validators import DataRequired, ValidationError
 
-def must_be_full_name(form, field):
-    if len(field.data.strip().split()) < 2:
-        raise ValidationError("Veuillez entrer le prénom et le nom.")
+# Configuration du logger
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Initialisation de Flask
+app = Flask(__name__)
+load_dotenv()
+app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
 
-load_dotenv()  # charge le fichier .env
+# Configuration mail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
-# 🔒 Taux fixes (modifiable plus tard via l'admin si besoin)
-FIXED_RATES = {
-    ("Côte d'Ivoire", "Russie"): 0.136,   # 1 XOF ➜ 0,136 RUB
-    ("Russie", "Côte d'Ivoire"): 6.6      # 1 RUB ➜ 6,6 XOF
-}
+# Initialisations
+mail = Mail(app)
+socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
+csrf = CSRFProtect(app)
+limiter = Limiter(app, key_func=get_remote_address)
 
-# 🔒 Taux fixes
+# --- Taux de change fixes ---
 FIXED_RATES = {
     ("Côte d'Ivoire", "Russie"): 0.136,
     ("Russie", "Côte d'Ivoire"): 6.6,
@@ -70,7 +65,7 @@ FIXED_RATES = {
     ("Russie", "Tchad"): 6.54
 }
 
-# 🔒 Frais fixes
+# --- Frais fixes ---
 FIXED_FEES = {
     ("Côte d'Ivoire", "Russie"): 370,
     ("Russie", "Côte d'Ivoire"): 30,
@@ -89,8 +84,11 @@ FIXED_FEES = {
     ("Russie", "Tchad"): 25
 }
 
+# --- Fonctions utilitaires ---
+def must_be_full_name(form, field):
+    if len(field.data.strip().split()) < 2:
+        raise ValidationError("Veuillez entrer le prénom et le nom.")
 
-# --- Ajout automatique des colonnes exchange_rate et converted_amount ----------
 def add_rate_columns():
     conn = sqlite3.connect('transfert.db')
     c = conn.cursor()
@@ -105,41 +103,19 @@ def add_rate_columns():
     conn.commit()
     conn.close()
 
-add_rate_columns()
-# -------------------------------------------------------------------------------
-
 def add_num_expediteur_column():
     conn = sqlite3.connect('transfert.db')
     c = conn.cursor()
     try:
         c.execute("ALTER TABLE pending_transfers ADD COLUMN numero_expediteur TEXT;")
     except sqlite3.OperationalError:
-        pass  # colonne déjà présente
+        pass
     conn.commit()
     conn.close()
 
+# Exécuter les ajustements de base de données
+add_rate_columns()
 add_num_expediteur_column()
-
-app = Flask(__name__)
-
-socketio = SocketIO(app, cors_allowed_origins="*")
-
-
-csrf = CSRFProtect(app)
-limiter = Limiter(get_remote_address)
-
-app.secret_key = os.getenv('SECRET_KEY')
-
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
-
-mail = Mail(app)
-
-csrf.init_app(app)
 
 # ✅ Variables de numéro selon le pays d’envoi
 NUMERO_RUSSIE = os.getenv("NUMERO_RUSSIE")
