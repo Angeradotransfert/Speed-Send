@@ -1,6 +1,5 @@
 import eventlet
 eventlet.monkey_patch()
-from django.shortcuts import render
 
 
 import os
