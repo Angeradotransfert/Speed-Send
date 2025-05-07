@@ -1,5 +1,7 @@
 import eventlet
 eventlet.monkey_patch()
+from django.shortcuts import render
+
 
 import os
 import random
@@ -1363,7 +1365,7 @@ def ratelimit_handler(e):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    socketio.run(app, host="0.0.0.0", port=port)
 
 
 

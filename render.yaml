@@ -1,10 +1,31 @@
 services:
   - type: web
-    name: Speed-Send
-    env: python
+    name: speed-send
+    runtime: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn app:app -k eventlet --timeout 60"
+    startCommand: "gunicorn -k eventlet -w 1 -b 0.0.0.0:$PORT app:app"
     envVars:
+      - key: SECRET_KEY
+        value: dce507e9ee620a250a61dba2446ee174
+      - key: MAIL_USERNAME
+        value: konea3873@gmail.com
+      - key: MAIL_PASSWORD
+        value: ryvj ikdl xjuc yfvm
+      - key: MAIL_DEFAULT_SENDER
+        value: konea3873@gmail.com
+      - key: FLW_PUBLIC_KEY
+        value: FLWPUBK_TEST-b9ec2c92a87ae85c4c767c89aa1866be-X
+      - key: FLW_SECRET_KEY
+        value: FLWSECK_TEST-933e23679eb8a2e79a2b0d0edfa715d5-X
+      - key: ENCRYPTION_KEY
+        value: FLWSECK_TEST2f34ab3beeb1
+      - key: NUMERO_RUSSIE
+        value: "+7 9026660221"
+      - key: NUMERO_COTEIVOIRE
+        value: "+225 0716651033"
+      - key: BOT_TOKEN
+        value: 8069658289:AAHzBhZbm8opr1rfGBclNpygLx4BSxD6plg
       - key: REDIS_URL
-        value: "redis://default:AYAyAAIjcDFmZGJlNjI4ZjUyYmI0NTYxYjUxYTdjZGFiNDFhOGQ4ZXAxMA@grand-shiner-32818.upstash.io:6379"
-    plan: free
+        value: redis://default:AYAyAAIjcDFmZGJlNjI4ZjUyYmI0NTYxYjUxYTdjZGFiNDFhOGQ4ZXAxMA@grand-shiner-32818.upstash.io:6379
+      - key: FLASK_ENV
+        value: production
