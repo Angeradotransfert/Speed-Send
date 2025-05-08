@@ -1353,9 +1353,8 @@ from flask import request
 def annuler_transferts_secret():
     # 🔐 Vérification du token
     token = request.args.get("token")
-    if token != "12345-secret":
+    if token != "Fqn0ZzOwY-dyRoXpAdDLCL9VYBhIXaYi1vUd1Hc8IkM":
         return "⛔ Accès refusé", 403
-
     # 🔄 Suppression des transferts expirés
     conn = sqlite3.connect('transfert.db')
     c = conn.cursor()
