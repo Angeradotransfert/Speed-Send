@@ -267,16 +267,13 @@
   });
 
   const settings = {
-    "Russie": { indicatif: "+7", devise: "RUB", moyens: ["Tinkoff", "Sberbank"] },
-    "Côte d'Ivoire": { indicatif: "+225", devise: "XOF", moyens: ["Orange Money", "MTN", "Wave", "Moov"] },
-    "Guinée": { indicatif: "+224", devise: "XOF", moyens: ["Orange Money Guinée", "MTN Mobile Money"] },
-    "Sénégal": { indicatif: "+221", devise: "XOF", moyens: ["Wave Sénégal", "Orange Money Sénégal"] },
-    "Cameroun": { indicatif: "+237", devise: "XAF", moyens: ["Orange Money Cameroun"] },
-    "Burkina Faso": { indicatif: "+226", devise: "XOF", moyens: ["Orange Money Burkina"] },
-    "Congo Brazzaville": { indicatif: "+242", devise: "XAF", moyens: ["MTN", "Airtel Money"] },
-    "Congo Kinshasa": { indicatif: "+243", devise: "XAF", moyens: ["Airtel Money"] },
-    "Tchad": { indicatif: "+235", devise: "XAF", moyens: ["Airtel Money"] }
-  };
+  "Russie": { indicatif: "+7", devise: "RUB", moyens: ["Tinkoff", "Sberbank"] },
+  "Côte d'Ivoire": { indicatif: "+225", devise: "XOF", moyens: ["Orange Money", "MTN", "Wave", "Moov"] },
+  "Guinée": { indicatif: "+224", devise: "XOF", moyens: ["Wave Guinée", "MTN Mobile Money"] },
+  "Sénégal": { indicatif: "+221", devise: "XOF", moyens: ["Wave Sénégal", "Orange Money Sénégal"] },
+  "Burkina Faso": { indicatif: "+226", devise: "XOF", moyens: ["Wave BF"] },
+  "Mali": { indicatif: "+223", devise: "XOF", moyens: ["Wave Mali"] }
+};
 
   function getCountryISO(pays) {
     const map = {
@@ -286,9 +283,7 @@
       "Sénégal": "sn",
       "Cameroun": "cm",
       "Burkina Faso": "bf",
-      "Congo Brazzaville": "cg",
-      "Congo Kinshasa": "cd",
-      "Tchad": "td"
+      "Mali": "ml"
     };
     return map[pays] || "ci";
   }

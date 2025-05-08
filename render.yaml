@@ -3,7 +3,7 @@ services:
     name: speed-send
     runtime: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn -k eventlet -w 1 -b 0.0.0.0:$PORT app:app"
+    startCommand: "startCommand: gunicorn -k gthread -w 1 -b 0.0.0.0:$PORT app:app"
     envVars:
       - key: SECRET_KEY
         value: dce507e9ee620a250a61dba2446ee174

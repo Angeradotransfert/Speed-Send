@@ -67,11 +67,7 @@ FIXED_RATES = {
     ("Russie", "Burkina Faso"): 6.6,
     ("Cameroun", "Russie"): 0.128,
     ("Russie", "Cameroun"): 6.54,
-    ("Congo Brazzaville", "Russie"): 0.128,
-    ("Russie", "Congo Brazzaville"): 6.54,
-    ("Congo Kinshasa", "Russie"): 0.128,
-    ("Russie", "Congo Kinshasa"): 6.54,
-    ("Russie", "Tchad"): 6.54
+
 }
 
 # --- Frais fixes ---
@@ -135,13 +131,10 @@ class TransfertForm(FlaskForm):
     pays_envoi = SelectField("Pays d'envoi", choices=[
         ("Russie", "Russie"),
         ("Côte d'Ivoire", "Côte d'Ivoire"),
-        ("Congo Brazzaville", "Congo Brazzaville"),
-        ("Congo Kinshasa", "Congo Kinshasa"),
         ("Guinée", "Guinée"),
-        ("Tchad", "Tchad"),
-        ("Cameroun", "Cameroun"),
         ("Sénégal", "Sénégal"),
-        ("Burkina Faso", "Burkina Faso")
+        ("Burkina Faso", "Burkina Faso"),
+        ("Mali", "Mali")
     ], validators=[DataRequired()])
 
     methode_envoi = SelectField("Méthode d'envoi", choices=[
@@ -172,13 +165,10 @@ class TransfertForm(FlaskForm):
     pays_destinataire = SelectField("Pays du destinataire", choices=[
         ("Russie", "Russie"),
         ("Côte d'Ivoire", "Côte d'Ivoire"),
-        ("Congo Brazzaville", "Congo Brazzaville"),
-        ("Congo Kinshasa", "Congo Kinshasa"),
         ("Guinée", "Guinée"),
-        ("Tchad", "Tchad"),
-        ("Cameroun", "Cameroun"),
         ("Sénégal", "Sénégal"),
-        ("Burkina Faso", "Burkina Faso")
+        ("Burkina Faso", "Burkina Faso"),
+        ("Mali", "Mali")
     ], validators=[DataRequired()])
 
     nom_destinataire = StringField("Nom complet du destinataire", validators=[DataRequired(), must_be_full_name])
@@ -941,13 +931,12 @@ def transfert_formulaire(transfert_id=None):
     pays_choices = [
         ("Russie", "Russie"),
         ("Côte d'Ivoire", "Côte d'Ivoire"),
-        ("Congo Brazzaville", "Congo Brazzaville"),
-        ("Congo Kinshasa", "Congo Kinshasa"),
         ("Guinée", "Guinée"),
-        ("Cameroun", "Cameroun"),
         ("Sénégal", "Sénégal"),
-        ("Burkina Faso", "Burkina Faso")
+        ("Burkina Faso", "Burkina Faso"),
+        ("Mali", "Mali")
     ]
+
     form.pays_envoi.choices = pays_choices
     form.pays_destinataire.choices = pays_choices
 
@@ -974,6 +963,15 @@ def transfert_formulaire(transfert_id=None):
         ("Orange Money Burkina", "Orange Money Burkina")
     ]
 
+    moyens_par_pays = {
+        "Côte d'Ivoire": ci_methods,
+        "Russie": ru_methods,
+        "Guinée": [("Wave Guinée", "Wave Guinée"), ("MTN Mobile Money", "MTN Mobile Money")],
+        "Sénégal": [("Wave Sénégal", "Wave Sénégal"), ("Orange Money Sénégal", "Orange Money Sénégal")],
+        "Burkina Faso": [("Wave BF", "Wave BF")],
+        "Mali": [("Wave Mali", "Wave Mali")]
+    }
+
     devise_choices = [
         ("XOF", "XOF"),
         ("XAF", "XAF"),
@@ -991,19 +989,10 @@ def transfert_formulaire(transfert_id=None):
         pays_envoi = request.form.get('pays_envoi')
         pays_destinataire = request.form.get('pays_destinataire')
 
-        if pays_envoi == "Russie":
-            form.methode_envoi.choices = ru_methods
-        elif pays_envoi == "Côte d'Ivoire":
-            form.methode_envoi.choices = ci_methods
-        else:
-            form.methode_envoi.choices = autres_methods
+        form.methode_envoi.choices = moyens_par_pays.get(pays_envoi, [])
+        form.methode_reception.choices = moyens_par_pays.get(pays_destinataire, [])
 
-        if pays_destinataire == "Russie":
-            form.methode_reception.choices = ru_methods
-        elif pays_destinataire == "Côte d'Ivoire":
-            form.methode_reception.choices = ci_methods
-        else:
-            form.methode_reception.choices = autres_methods
+        form.methode_reception.choices = moyens_par_pays.get(pays_destinataire, [])
 
     else:
         # GET - Valeurs par défaut

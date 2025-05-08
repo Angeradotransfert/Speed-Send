@@ -120,15 +120,36 @@
     </div>
 
     <div id="animated-box" class="numero-anim" style="display: none;">
-        💳 Merci de transférer la somme totale (<strong>{{ total_source }} {{ currency }}</strong>) à ce numéro :<br>
-        {% if sender_country in ["Côte d'Ivoire", "Guinée", "Tchad", "Sénégal", "Burkina Faso", "Cameroun", "Congo Brazzaville", "Congo Kinshasa"] %}
-            <span id="numero-text">{{ numero_cote }}</span>
-        {% elif sender_country == "Russie" %}
-            <span id="numero-text">{{ numero_russie }}</span>
-        {% endif %}
-        <button onclick="copierNumero()" class="copy-btn">📋 Copier</button>
-        <span id="copied-msg" style="display:none; color:green; font-weight:bold;">✅ Numéro copié !</span>
-    </div>
+  <h3 style="text-align: center; margin-bottom: 20px;">
+    Veuillez transférer la somme totale de
+    <span style="color:#dc2626">{{ total_source }} {{ currency }}</span>
+    vers le compte ci-dessous :
+  </h3>
+
+  <div style="background-color: #e0e7ff; padding: 20px; border-radius: 12px; max-width: 400px; margin: 0 auto; text-align: left;">
+    {% if sender_country in ["Côte d'Ivoire", "Guinée", "Sénégal", "Burkina Faso", "Mali"] %}
+        <p>📞 <strong>Numéro :</strong> +225 0716651033</p>
+        <p>👤 <strong>Nom du compte :</strong> Osseni Karimantou Ode Victoire</p>
+        <p>📱 <strong>Moyen :</strong> Wave</p>
+        <p>💰 <strong>Montant à transférer :</strong> {{ total_source }} {{ currency }}</p>
+        <div style="text-align:center;">
+          <button onclick="copierTexte('+2250716651033')" class="copy-btn">📋 Copier le numéro</button>
+          <span id="copied-msg" style="display:none; color:green; font-weight:bold;">✅ Numéro copié !</span>
+        </div>
+    {% elif sender_country == "Russie" %}
+        <p>🏦 <strong>Banque :</strong> Tinkoff</p>
+        <p>📞 <strong>Numéro :</strong> +7 9026660221</p>
+        <p>👤 <strong>Nom du titulaire :</strong> Kone Ali</p>
+        <p>💰 <strong>Montant à transférer :</strong> {{ total_source }} {{ currency }}</p>
+        <div style="text-align:center;">
+          <button onclick="copierTexte('+79026660221')" class="copy-btn">📋 Copier le numéro</button>
+          <span id="copied-msg" style="display:none; color:green; font-weight:bold;">✅ Numéro copié !</span>
+        </div>
+    {% else %}
+        <p style="text-align:center;">ℹ️ Les instructions de paiement s’afficheront ici selon le pays sélectionné.</p>
+    {% endif %}
+  </div>
+</div>
 
 
     <div class="countdown">
@@ -172,14 +193,13 @@
         }
     });
 
-    function copierNumero() {
-        const text = document.getElementById("numero-text").textContent;
-        navigator.clipboard.writeText(text).then(() => {
-            const msg = document.getElementById("copied-msg");
-            msg.style.display = "inline";
-            setTimeout(() => { msg.style.display = "none"; }, 2000);
-        });
-    }
+    function copierTexte(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        const msg = document.getElementById("copied-msg");
+        msg.style.display = "inline";
+        setTimeout(() => { msg.style.display = "none"; }, 2000);
+    });
+  }
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
