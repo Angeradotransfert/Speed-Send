@@ -1,6 +1,3 @@
-import eventlet
-eventlet.monkey_patch()
-
 
 import os
 import random
@@ -43,7 +40,7 @@ app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
 # Initialisations
 mail = Mail(app)
-socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
+socketio = SocketIO(app, async_mode='threading', cors_allowed_origins="*")
 csrf = CSRFProtect(app)
 from redis import Redis
 from flask_limiter import Limiter
