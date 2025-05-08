@@ -156,6 +156,11 @@
         ⏳ Veuillez effectuer le paiement dans : <span id="timer">10:00</span>
     </div>
 
+    <div style="margin-top: 10px; color: #d9534f; font-weight: bold; text-align: center;">
+  ⚠️ Important : Veuillez transférer la somme totale dans le temps imparti.<br>
+  Passé ce délai, le transfert sera <u>automatiquement annulé</u>.
+</div>
+
     <form method="POST" action="{{ url_for('payer_confirme') }}">
     {{ annulation_form.csrf_token }}
     <input type="hidden" name="transfert_id" value="{{ transfert_id }}">
