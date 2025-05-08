@@ -1347,6 +1347,33 @@ def annuler_transfert(transfert_id):
 def ratelimit_handler(e):
     return render_template("429.html"), 429
 
+from flask import request
+
+@app.route("/annuler_transferts_secret")
+def annuler_transferts_secret():
+    # 🔐 Vérification du token
+    token = request.args.get("token")
+    if token != "12345-secret":
+        return "⛔ Accès refusé", 403
+
+    # 🔄 Suppression des transferts expirés
+    conn = sqlite3.connect('transfert.db')
+    c = conn.cursor()
+
+    from datetime import datetime, timedelta
+    now = datetime.now()
+    limite = now - timedelta(minutes=10)
+    limite_str = limite.strftime("%Y-%m-%d %H:%M:%S")
+
+    c.execute('''
+        DELETE FROM pending_transfers
+        WHERE status = 'en_attente' AND created_at <= ?
+    ''', (limite_str,))
+    conn.commit()
+    conn.close()
+
+    return "🗑️ Transferts expirés supprimés."
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
