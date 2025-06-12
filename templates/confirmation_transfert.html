@@ -145,11 +145,24 @@
           <button onclick="copierTexte('+79026660221')" class="copy-btn">📋 Copier le numéro</button>
           <span id="copied-msg" style="display:none; color:green; font-weight:bold;">✅ Numéro copié !</span>
         </div>
+    {% elif sender_country == "Cameroun" %}
+        <p>📞 <strong>Numéros disponibles :</strong></p>
+        <ul style="list-style-type: none; padding-left: 0;">
+          <li>📱 <strong>Orange Money :</strong> +237 691592562 (Kanme Arcelle)</li>
+          <li>📱 <strong>MTN Mobile Money :</strong> +237 670334691 (Kanme Arcelle)</li>
+        </ul>
+        <p>💰 <strong>Montant à transférer :</strong> {{ total_source }} {{ currency }}</p>
+        <div style="text-align:center;">
+          <button onclick="copierTexte('+237691592562')" class="copy-btn">📋 Copier Orange</button>
+          <button onclick="copierTexte('+237670334691')" class="copy-btn">📋 Copier MTN</button>
+          <span id="copied-msg" style="display:none; color:green; font-weight:bold;">✅ Numéro copié !</span>
+        </div>
     {% else %}
         <p style="text-align:center;">ℹ️ Les instructions de paiement s’afficheront ici selon le pays sélectionné.</p>
     {% endif %}
-  </div>
 </div>
+</div>
+
 
 
     <div class="countdown">

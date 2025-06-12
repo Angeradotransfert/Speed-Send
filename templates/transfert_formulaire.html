@@ -88,6 +88,7 @@
   100% { transform: scale(1); }
 }
 
+
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css">
@@ -310,7 +311,8 @@
   "Guinée": { indicatif: "+224", devise: "XOF", moyens: ["Wave Guinée", "MTN Mobile Money"] },
   "Sénégal": { indicatif: "+221", devise: "XOF", moyens: ["Wave Sénégal", "Orange Money Sénégal"] },
   "Burkina Faso": { indicatif: "+226", devise: "XOF", moyens: ["Wave BF"] },
-  "Mali": { indicatif: "+223", devise: "XOF", moyens: ["Wave Mali"] }
+  "Mali": { indicatif: "+223", devise: "XOF", moyens: ["Wave Mali"] },
+  "Cameroun": { indicatif: "+237", devise: "XAF", moyens: ["Orange Money Cameroun", "MTN Mobile Money"] }
 };
 
   function getCountryISO(pays) {
@@ -348,7 +350,6 @@
   }
 </script>
 <script>
-  // Disparaît automatiquement après 5 secondes avec transition
   setTimeout(() => {
     const flash = document.getElementById("flash-message");
     if (flash) {
@@ -370,7 +371,6 @@
       'devise_expediteur'
     ];
 
-    // Surbrillance des champs vides
     champs.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
@@ -401,7 +401,6 @@
     }
   }
 
-  // Active le suivi dès le chargement
   document.addEventListener("DOMContentLoaded", function () {
     detectRemplissageExpediteur();
     const champsExp = [
@@ -424,15 +423,11 @@
 
 <script>
   const tauxFixes = {
-  "XOF|RUB": 0.136,
-  "RUB|XOF": 6.6,
-  "XOF|RUB": 0.136, // Sénégal, Guinée, Burkina Faso → Russie
-  "XAF|RUB": 0.128, // Cameroun, Congo, Tchad → Russie
-  "RUB|XOF": 6.54,  // Russie → Sénégal, Guinée, Burkina Faso
-  "RUB|XAF": 6.54,  // Russie → Cameroun, Congo, Tchad
-  "XOF|RUB": 0.136, // Mali → Russie
-  "RUB|XOF": 6.54,  // Russie → Mali
-};
+    "XOF|RUB": 0.136,
+    "RUB|XOF": 6.6,
+    "XAF|RUB": 0.126, // Cameroun → Russie
+    "RUB|XAF": 6.8   // Russie → Cameroun
+  };
 
   function convertirAuto() {
     const montant = parseFloat(document.getElementById("montant_convert").value);

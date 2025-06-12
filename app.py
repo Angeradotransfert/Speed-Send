@@ -65,7 +65,7 @@ FIXED_RATES = {
     ("Russie", "Guinée"): 6.6,
     ("Burkina Faso", "Russie"): 0.136,
     ("Russie", "Burkina Faso"): 6.6,
-    ("Cameroun", "Russie"): 0.128,
+    ("Cameroun", "Russie"): 0.126,
     ("Russie", "Cameroun"): 6.54,
 
 }
@@ -125,6 +125,9 @@ add_num_expediteur_column()
 # ✅ Variables de numéro selon le pays d’envoi
 NUMERO_RUSSIE = os.getenv("NUMERO_RUSSIE")
 NUMERO_COTEIVOIRE = os.getenv("NUMERO_COTEIVOIRE")
+NUMERO_CAMEROUN_ORANGE = os.getenv("NUMERO_CAMEROUN_ORANGE")
+NUMERO_CAMEROUN_MTN = os.getenv("NUMERO_CAMEROUN_MTN")
+
 
 class TransfertForm(FlaskForm):
     nom_expediteur = StringField("Nom complet de l'expéditeur", validators=[DataRequired(), must_be_full_name])
@@ -134,7 +137,8 @@ class TransfertForm(FlaskForm):
         ("Guinée", "Guinée"),
         ("Sénégal", "Sénégal"),
         ("Burkina Faso", "Burkina Faso"),
-        ("Mali", "Mali")
+        ("Mali", "Mali"),
+        ("Cameroun", "Cameroun")  # ✅ Virgule corrigée
     ], validators=[DataRequired()])
 
     methode_envoi = SelectField("Méthode d'envoi", choices=[
@@ -168,7 +172,8 @@ class TransfertForm(FlaskForm):
         ("Guinée", "Guinée"),
         ("Sénégal", "Sénégal"),
         ("Burkina Faso", "Burkina Faso"),
-        ("Mali", "Mali")
+        ("Mali", "Mali"),
+        ("Cameroun", "Cameroun")  # ✅ Virgule corrigée
     ], validators=[DataRequired()])
 
     nom_destinataire = StringField("Nom complet du destinataire", validators=[DataRequired(), must_be_full_name])
@@ -934,9 +939,9 @@ def transfert_formulaire(transfert_id=None):
         ("Guinée", "Guinée"),
         ("Sénégal", "Sénégal"),
         ("Burkina Faso", "Burkina Faso"),
-        ("Mali", "Mali")
+        ("Mali", "Mali"),
+        ("Cameroun", "Cameroun")  # ✅ Ajouté ici aussi !
     ]
-
     form.pays_envoi.choices = pays_choices
     form.pays_destinataire.choices = pays_choices
 
@@ -958,6 +963,7 @@ def transfert_formulaire(transfert_id=None):
         ("Orange Money Guinée", "Orange Money Guinée"),
         ("MTN Mobile Money", "MTN Mobile Money"),
         ("Orange Money Cameroun", "Orange Money Cameroun"),
+        ("MTN Mobile Money Cameroun", "MTN Mobile Money Cameroun"),
         ("Wave Sénégal", "Wave Sénégal"),
         ("Orange Money Sénégal", "Orange Money Sénégal"),
         ("Orange Money Burkina", "Orange Money Burkina")
@@ -969,7 +975,11 @@ def transfert_formulaire(transfert_id=None):
         "Guinée": [("Wave Guinée", "Wave Guinée"), ("MTN Mobile Money", "MTN Mobile Money")],
         "Sénégal": [("Wave Sénégal", "Wave Sénégal"), ("Orange Money Sénégal", "Orange Money Sénégal")],
         "Burkina Faso": [("Wave BF", "Wave BF")],
-        "Mali": [("Wave Mali", "Wave Mali")]
+        "Mali": [("Wave Mali", "Wave Mali")],
+        "Cameroun": [
+            ("Orange Money Cameroun", "Orange Money Cameroun"),
+            ("MTN Mobile Money Cameroun", "MTN Mobile Money Cameroun")
+        ]
     }
 
     devise_choices = [
@@ -991,9 +1001,6 @@ def transfert_formulaire(transfert_id=None):
 
         form.methode_envoi.choices = moyens_par_pays.get(pays_envoi, [])
         form.methode_reception.choices = moyens_par_pays.get(pays_destinataire, [])
-
-        form.methode_reception.choices = moyens_par_pays.get(pays_destinataire, [])
-
     else:
         # GET - Valeurs par défaut
         form.methode_envoi.choices = autres_methods
@@ -1036,7 +1043,6 @@ def transfert_formulaire(transfert_id=None):
         conn.close()
 
         converted = amount * rate
-        converted = amount * rate
         total_source = amount + frais
         total_dest   = converted + frais
         created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -1065,7 +1071,6 @@ def transfert_formulaire(transfert_id=None):
 
         conn.close()
 
-
         # ✅ Envoie le transfert au tableau admin en temps réel
         socketio.emit('nouveau_transfert', {
             'id': transfert_id,
@@ -1076,14 +1081,15 @@ def transfert_formulaire(transfert_id=None):
             'created_at': created_at,
             'status': 'en_attente'
         })
+
         # 🔔 Notification Telegram
         msg = (
-            "📥 NOUVEAU TRANSFERT MANUEL\n"
+            "📅 NOUVEAU TRANSFERT MANUEL\n"
             f"👤 De : {sender_name} ({sender_country}) via {payment_method}\n"
             f"📞 Numéro : {numero_expediteur}\n"
             f"💸 Montant envoyé : {amount} {currency}\n"
             f"💱 Montant à recevoir : {converted} {currency_dest}\n"
-            f"🔁 Frais : {frais} {frais_currency}\n"
+            f"➶ Frais : {frais} {frais_currency}\n"
             f"💰 Total payé : {total_source} {currency}\n"
             f"📲 Vers : {recipient_name} / {recipient_phone} ({recipient_operator})\n"
             f"🌍 Pays destinataire : {recipient_country}\n"
@@ -1091,7 +1097,6 @@ def transfert_formulaire(transfert_id=None):
         )
         send_telegram_message(msg)
 
-        # 🔄 Redirection confirmation
         return redirect(url_for(
             'confirmer_transfert',
             sender_name=sender_name,
@@ -1120,7 +1125,9 @@ def transfert_formulaire(transfert_id=None):
         'transfert_formulaire.html',
         form=form,
         numero_russie=NUMERO_RUSSIE,
-        numero_cote=NUMERO_COTEIVOIRE
+        numero_cote=NUMERO_COTEIVOIRE,
+        numero_cameroun_orange=NUMERO_CAMEROUN_ORANGE,
+        numero_cameroun_mtn=NUMERO_CAMEROUN_MTN
     )
 
 from flask_wtf.csrf import generate_csrf  # ✅ à ajouter tout en haut si pas encore fait
