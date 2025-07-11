@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "projet-transfert-argent"
+version = "0.1.0"
+description = "Application Flask de transfert d'argent avec Flutterwave, Redis et SocketIO"
+authors = ["KONE <konea3873@gmail.com.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+flask = "^2.3.3"
+flask-socketio = "^5.3.6"
+flask-mail = "^0.9.1"
+flask-wtf = "^1.2.1"
+flask-login = "^0.6.3"
+flask-limiter = "^3.6.2"
+wtforms = "^3.1.2"
+python-dotenv = "^1.0.1"
+requests = "^2.31.0"
+bcrypt = "^4.1.3"
+redis = "^5.0.3"
+rave-python = "^2.1.8"
+eventlet = "^0.35.1"  # requis si un jour tu veux passer à async_mode="eventlet"
+email-validator = "^2.1.0.post1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
